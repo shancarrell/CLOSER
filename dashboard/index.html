@@ -174,7 +174,7 @@ th.r,td.r{text-align:right}
 .drawer textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);padding:8px 10px;font:inherit;font-size:13px;margin-top:6px}
 
 /* travel */
-.year{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.year{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-content:start}
 .month h4{margin:0 0 6px;font-family:var(--f-display);font-size:13px;font-weight:700;display:flex;justify-content:space-between}
 .month h4 span{font-weight:500;color:var(--muted);font-size:11px}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
@@ -389,8 +389,8 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
   </section>
 
   <section class="panel" id="travel" style="margin-bottom:14px">
-    <div class="ph"><div><h2>Travel calendar</h2><div class="sub">Amber ring = trip overlaps earnings for a stock he owns, a Fed decision, or a major economic release</div></div>
-      <div class="yr-nav"><button id="yPrev" aria-label="Previous year">‹</button><b id="yLbl"></b><button id="yNext" aria-label="Next year">›</button></div></div>
+    <div class="ph"><div><h2>Travel calendar</h2><div class="sub">Next 6 months · amber ring = trip overlaps earnings for a stock he owns, a Fed decision, or a major economic release</div></div>
+      <div class="yr-nav"><button id="yPrev" aria-label="Earlier month">‹</button><b id="yLbl"></b><button id="yNext" aria-label="Later month">›</button><button id="yNow" class="btn ghost" style="width:auto;height:28px;padding:0 10px" hidden>Today</button></div></div>
     <div class="travel-grid">
       <div class="year" id="yearGrid"></div>
       <div>
@@ -856,34 +856,38 @@ const DEFAULT_TRIPS = [
 ];
 let trips = store.get("cos-trips",DEFAULT_TRIPS);
 
-let yr = store.get("cos-yr",2026);
+let wOff = 0; // months from the current month; the calendar always shows 6 months
+const winStart = () => new Date(TODAY.getFullYear(), TODAY.getMonth()+wOff, 1);
 function inTrip(ds){ return trips.find(t=>ds>=t.s && ds<=t.e); }
 function tripConflicts(t){ return events.filter(e=>relevant(e) && e.d>=t.s && e.d<=t.e).sort((a,b)=>a.d<b.d?-1:1); }
 function conflictText(t,e){ const p=e.sym&&held(e.sym), d=parse(e.d);
   return `You're in ${esc(t.n.split(" · ")[0])} during <b>${e.l}</b> · ${DOW[d.getDay()]} ${md(d)}, ${e.tm.replace("After close","after close")}${p?` · ${(p.mv/S.total*100).toFixed(1)}% of the account`:""}`; }
 function upcomingConflicts(){ const out=[]; trips.filter(t=>parse(t.e)>=TODAY).forEach(t=>tripConflicts(t).forEach(e=>{ if(parse(e.d)>=TODAY) out.push({t,e}); })); return out.sort((a,b)=>a.e.d<b.e.d?-1:1); }
 function drawYear(){
-  $("#yLbl").textContent = yr;
+  const ws=winStart(), we=new Date(ws.getFullYear(), ws.getMonth()+6, 0);
+  $("#yLbl").textContent = `${MON[ws.getMonth()]} ${ws.getFullYear()} – ${MON[we.getMonth()]} ${we.getFullYear()}`;
+  $("#yNow").hidden = wOff===0;
   const keyDates = new Set(events.filter(relevant).map(e=>e.d));
   const cf0 = upcomingConflicts();
   $("#conflicts").innerHTML = cf0.length? cf0.slice(0,4).map(c=>`<div class="cflct">${conflictText(c.t,c.e)}${c.e.link?` · <a href="${c.e.link}" target="_blank" rel="noopener">event ↗</a>`:""}</div>`).join("") : "";
-  let h=""; for(let mo=0;mo<12;mo++){ const first=new Date(yr,mo,1), dim=new Date(yr,mo+1,0).getDate(); let tripDays=0; let cells="SMTWTFS".split("").map(c=>`<div class="dow">${c}</div>`).join("");
+  let h=""; for(let k=0;k<6;k++){ const first=new Date(ws.getFullYear(),ws.getMonth()+k,1), Y=first.getFullYear(), mo=first.getMonth(), dim=new Date(Y,mo+1,0).getDate(); let tripDays=0; let cells="SMTWTFS".split("").map(c=>`<div class="dow">${c}</div>`).join("");
     for(let i=0;i<first.getDay();i++) cells+="<div></div>";
-    for(let d=1;d<=dim;d++){ const dt=new Date(yr,mo,d), ds=iso(dt), t=inTrip(ds); if(t) tripDays++;
+    for(let d=1;d<=dim;d++){ const dt=new Date(Y,mo,d), ds=iso(dt), t=inTrip(ds); if(t) tripDays++;
       const c=[]; if(t) c.push("t"); if(t && keyDates.has(ds)) c.push("fl"); if(!t && keyDates.has(ds)) c.push("ev"); if(ds===iso(TODAY)) c.push("today"); if(!t && (dt.getDay()===0||dt.getDay()===6)) c.push("wk");
       cells+=`<div class="${c.join(" ")}" ${t?`title="${esc(t.n)}"`:""}>${d}</div>`; }
-    h+=`<div class="month"><h4>${MON[mo]}${tripDays?`<span>${tripDays} day${tripDays>1?"s":""} away</span>`:""}</h4><div class="days">${cells}</div></div>`; }
+    h+=`<div class="month"><h4>${MON[mo]}${k===0||mo===0?" "+Y:""}${tripDays?`<span>${tripDays} day${tripDays>1?"s":""} away</span>`:""}</h4><div class="days">${cells}</div></div>`; }
   $("#yearGrid").innerHTML=h;
-  const list = trips.filter(t=>t.s.startsWith(yr)||t.e.startsWith(yr)).sort((a,b)=>a.s<b.s?-1:1);
+  const list = trips.filter(t=>t.e>=iso(ws) && t.s<=iso(we)).sort((a,b)=>a.s<b.s?-1:1);
   const upcoming = list.filter(x=>parse(x.s)>=TODAY)[0];
   $("#tripList").innerHTML = list.length? list.map(t=>{ const s=parse(t.s), e=parse(t.e), past=e<TODAY, cf=tripConflicts(t);
-    return `<li style="${past?"opacity:.55":""}"><div class="grow"><div class="ttl">${esc(t.n)}</div><div class="meta">${md(s)} – ${md(e)} · ${Math.round((e-s)/864e5)+1} days${cf.length?` · <span style="color:var(--warn)">overlaps ${cf.map(e=>`${esc(e.sym||e.l)} ${md(parse(e.d))}`).join(", ")}</span>`:""}</div></div>${t===upcoming?'<span class="chip trip">Next</span>':""}<button class="x" data-del="${t.id}" aria-label="Remove ${esc(t.n)}">×</button></li>`; }).join("") : `<li class="meta">No trips in ${yr} yet. Add one below.</li>`;
+    return `<li style="${past?"opacity:.55":""}"><div class="grow"><div class="ttl">${esc(t.n)}</div><div class="meta">${md(s)} – ${md(e)} · ${Math.round((e-s)/864e5)+1} days${cf.length?` · <span style="color:var(--warn)">overlaps ${cf.map(e=>`${esc(e.sym||e.l)} ${md(parse(e.d))}`).join(", ")}</span>`:""}</div></div>${t===upcoming?'<span class="chip trip">Next</span>':""}<button class="x" data-del="${t.id}" aria-label="Remove ${esc(t.n)}">×</button></li>`; }).join("") : `<li class="meta">No trips in these 6 months. Add one below.</li>`;
 }
-$("#yPrev").onclick=()=>{ yr--; store.set("cos-yr",yr); drawYear(); };
-$("#yNext").onclick=()=>{ yr++; store.set("cos-yr",yr); drawYear(); };
+$("#yPrev").onclick=()=>{ wOff--; drawYear(); };
+$("#yNext").onclick=()=>{ wOff++; drawYear(); };
+$("#yNow").onclick=()=>{ wOff=0; drawYear(); };
 $("#tripList").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(!b) return; trips=trips.filter(t=>t.id!==b.dataset.del); store.set("cos-trips",trips); drawYear(); drawAttn(); });
 $("#tripForm").addEventListener("submit",e=>{ e.preventDefault(); let s=$("#tripStart").value, en=$("#tripEnd").value; if(!s||!en) return; if(en<s) [s,en]=[en,s];
-  trips.push({id:"t"+Date.now(),n:$("#tripName").value.trim(),s,e:en}); store.set("cos-trips",trips); yr=Number(s.slice(0,4)); e.target.reset(); drawYear(); drawAttn(); });
+  trips.push({id:"t"+Date.now(),n:$("#tripName").value.trim(),s,e:en}); store.set("cos-trips",trips); { const st=parse(s), diff=(st.getFullYear()-TODAY.getFullYear())*12+st.getMonth()-TODAY.getMonth(); if(diff<wOff||diff>wOff+5) wOff=diff; } e.target.reset(); drawYear(); drawAttn(); });
 
 /* ---------- to-do ---------- */
 const DEFAULT_TODOS = [
