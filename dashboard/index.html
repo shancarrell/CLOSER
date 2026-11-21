@@ -210,6 +210,20 @@ th.r,td.r{text-align:right}
 .rc.ok .rci{background:var(--gain-soft);color:var(--gain)} .rc.warn .rci{background:var(--warn-soft);color:var(--warn)}
 .rc.bad .rci{background:var(--loss-soft);color:var(--loss)} .rc.info .rci{background:var(--accent-soft);color:var(--accent)}
 @media (max-width:760px){ .db-row{grid-template-columns:minmax(0,1fr)} }
+.xgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px}
+.moves{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.mv{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:12.5px}
+.mv .tkr{font-family:var(--f-num);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{position:relative;height:12px}
+.track::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted);opacity:.6}
+.track i{position:absolute;top:0;height:100%;border-radius:3px}
+.track i.up{left:calc(50% + 1px);background:var(--gain)} .track i.dn{right:calc(50% + 1px);background:var(--loss)}
+.mv .num{text-align:right}
+.cflct{border:1px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px}
+.cflct b{color:var(--ink)} .cflct .meta{color:var(--ink-2)}
+.rv{font-size:11.5px;padding:3px 9px;flex:none;align-self:center}
+.rv[disabled]{opacity:.6;cursor:default}
+@media (max-width:760px){ .xgrid{grid-template-columns:minmax(0,1fr)} }
 .roadmap{padding-bottom:40px}
 .roadmap ol{margin:0;padding-left:20px;color:var(--ink-2);max-width:80ch}
 .roadmap li{margin-bottom:6px}
@@ -234,7 +248,7 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
   <div class="wrap">
     <div class="brand"><i></i>Chief of Staff</div>
     <nav class="nav" aria-label="Sections">
-      <a href="#portfolio">Portfolio</a><a href="#pnl">P&amp;L</a><a href="#brief">Brief</a><a href="#journal">Journal</a><a href="#todo">To-do</a><a href="#mail">Mail</a><a href="#travel">Travel</a>
+      <a href="#portfolio">Portfolio</a><a href="#exposure">Exposure</a><a href="#pnl">P&amp;L</a><a href="#brief">Brief</a><a href="#journal">Journal</a><a href="#todo">To-do</a><a href="#mail">Mail</a><a href="#travel">Travel</a>
     </nav>
     <div class="sync"><span class="chip" id="srcChip">Sample data</span><span>Schwab sync <b class="num" id="syncTime">—</b></span></div>
   </div>
@@ -292,6 +306,16 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
         <div class="tbl"><table id="posTable"></table></div>
       </section>
 
+      <section class="panel" id="exposure">
+        <div class="ph"><div><h2>Exposure at a glance</h2><div class="sub">From Schwab positions</div></div><a class="btn ghost" href="https://trade.thinkorswim.com/" target="_blank" rel="noopener">Open thinkorswim ↗</a></div>
+        <div class="stats" id="xStats"></div>
+        <div class="xgrid">
+          <div><h3 class="brief-h" style="margin-top:0">What moved my account last session</h3><ul class="moves" id="moves"></ul><p class="meta" id="movesNote"></p></div>
+          <div><h3 class="brief-h" style="margin-top:0">Options expiring</h3><ul class="list" id="expList"></ul>
+            <h3 class="brief-h">Open orders <span class="chip info" id="ordChip">Example</span></h3><ul class="list" id="ordList"></ul></div>
+        </div>
+      </section>
+
       <section class="panel" id="pnl">
         <div class="ph"><div><h2>Profit &amp; loss</h2><div class="sub">Year to date · return adjusts for deposits and withdrawals</div></div>
           <div class="seg" id="pnlMode" role="group" aria-label="Breakdown"><button data-m="month" aria-pressed="true">Monthly</button><button data-m="week">Weekly</button></div></div>
@@ -308,7 +332,9 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
         <ol class="drivers" id="drivers"></ol>
         <h3 class="brief-h">Your holdings &amp; watchlist</h3>
         <ul class="list news" id="newsHold"></ul>
-        <h3 class="brief-h">From your sites and blogs</h3>
+        <h3 class="brief-h">SEC filings · holdings &amp; watchlist</h3>
+        <ul class="list news" id="filings"></ul>
+        <h3 class="brief-h">Newsletters &amp; blogs</h3>
         <ul class="list news" id="newsBlogs"></ul>
       </section>
     </div>
@@ -330,7 +356,7 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
       <section class="panel" id="mail">
         <div class="ph"><div><h2>Unread Gmail</h2><div class="sub">From chosen senders only</div></div><span style="display:flex;gap:6px;align-items:center"><span class="chip info">Example</span><span class="count" id="mailCount"></span></span></div>
         <ul class="list mail" id="mailList"></ul>
-        <p class="meta">Senders: Schwab, thinkorswim alerts, Barron's, The Daily Shot, Stratechery. Opens in Gmail.</p>
+        <p class="meta">Senders: Schwab and thinkorswim alerts. Newsletters go to the morning brief. Review adds the email to the to-do list.</p>
       </section>
 
       <section class="panel" id="calendar">
@@ -348,11 +374,12 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
   </section>
 
   <section class="panel" id="travel" style="margin-bottom:14px">
-    <div class="ph"><div><h2>Travel calendar</h2><div class="sub">Amber ring = trip overlaps an earnings date or Fed meeting on his book</div></div>
+    <div class="ph"><div><h2>Travel calendar</h2><div class="sub">Amber ring = trip overlaps earnings for a stock he owns, a Fed decision, or a major economic release</div></div>
       <div class="yr-nav"><button id="yPrev" aria-label="Previous year">‹</button><b id="yLbl"></b><button id="yNext" aria-label="Next year">›</button></div></div>
     <div class="travel-grid">
       <div class="year" id="yearGrid"></div>
       <div>
+        <div id="conflicts"></div>
         <h3 class="brief-h" style="margin-top:0">Trips</h3>
         <ul class="list" id="tripList"></ul>
         <form class="trip-form" id="tripForm">
@@ -499,8 +526,10 @@ function sampleState(){
     {t:"COST",n:"Costco",grp:"Consumer",q:90,cost:870.00,px:948.20,prev:951.00},
     {t:"JPM",n:"JPMorgan Chase",grp:"Financials",q:450,cost:205.60,px:288.10,prev:286.40},
     {t:"XOM",n:"Exxon Mobil",grp:"Energy",q:500,cost:112.30,px:108.90,prev:110.20},
-    {t:"TLT",n:"20+ Yr Treasury ETF",grp:"Bonds",q:800,cost:92.10,px:88.40,prev:88.10}
-  ].map(p=>({...p,mv:p.q*p.px,day:p.q*(p.px-p.prev),costTotal:p.q*p.cost}));
+    {t:"TLT",n:"20+ Yr Treasury ETF",grp:"Bonds",q:800,cost:92.10,px:88.40,prev:88.10},
+    {t:"SPY 12/18/2026 590.00 P",n:"PUT SPDR S&P 500 $590",grp:"Options",q:4,cost:6.50,px:4.10,prev:4.66,mult:100},
+    {t:"NVDA 11/27/2026 200.00 C",n:"CALL NVIDIA $200",grp:"Options",q:-3,cost:2.40,px:1.15,prev:0.98,mult:100}
+  ].map(p=>{ const m=p.mult||1; return {...p,mv:p.q*p.px*m,day:p.q*(p.px-p.prev)*m,costTotal:p.q*p.cost*m}; });
   const trades = [
     {id:1,t:"NVDA",d:"2026-11-20",q:150,px:185.40,cost:142.10,fee:0.66,setup:"Trim into strength",fills:[["2026-09-03","Buy",150,142.10],["2026-11-20","Sell",150,185.40]],note:"Trimmed ahead of the weekend. Position still 900 sh. Plan to re-add near the 50-day."},
     {id:2,t:"TSLA",d:"2026-11-19",q:80,px:338.20,cost:352.75,fee:0.66,setup:"Earnings fade",fills:[["2026-11-12","Buy",80,352.75],["2026-11-19","Sell",80,338.20]],note:"Stopped out. Entered too early; didn't wait for the gap to fill."},
@@ -527,6 +556,7 @@ function sampleState(){
     raw.forEach((x,i)=>{ const k=i/(raw.length-1); x.v+=scale*k; x.b*=Math.pow(bf,k); series.push(x); }); }
   return {src:"sample",asOf:"6:42 AM CT",account:"···4821",positions,cash,total,trades,flows,monthly,weekly,series,start,year:2026,
     last:"2026-11-20",fees:null,income:null,grpLabel:"sector",recon:[],
+    orders:[{t:"NVDA",side:"Buy",q:100,type:"Limit",px:172.00,tif:"GTC"},{t:"XOM",side:"Sell",q:300,type:"Stop",px:104.50,tif:"GTC"},{t:"COST",side:"Sell",q:30,type:"Limit",px:985.00,tif:"Day"}],
     flags:{COST:"Earnings Dec 3"}};
 }
 
@@ -698,7 +728,7 @@ function render(){
   // positions
   $("#posTable").innerHTML = `<thead><tr><th>Symbol</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Day</th><th class="r">Market value</th><th class="r">Unrealized</th><th class="r">Weight</th></tr></thead><tbody>`+
     (S.positions.length? S.positions.slice().sort((a,b)=>b.mv-a.mv).map(p=>{ const u=p.mv-p.costTotal, dc=(p.mv-p.day)?p.day/(p.mv-p.day)*100:0, fl=S.flags[p.t];
-    return `<tr><td><span class="num" style="font-weight:600">${esc(p.t)}</span> <span class="muted" style="font-size:12px">${esc(p.n.slice(0,22))}</span>${fl?`<span class="flag">${fl}</span>`:""}</td><td class="r num">${p.q.toLocaleString()}</td><td class="r num">${isNaN(p.px)?"—":p.px.toFixed(2)}</td><td class="r num ${cls(dc)}">${pct(dc)}</td><td class="r num">${fmt$(p.mv)}</td><td class="r num ${cls(u)}">${isNaN(u)?"—":fmtS$(u)+`<br><span style="font-size:11px">${pct(u/p.costTotal*100,1)}</span>`}</td><td class="r num">${(p.mv/S.total*100).toFixed(1)}%</td></tr>`; }).join("") : `<tr><td colspan="7" class="muted">No positions file loaded.</td></tr>`)+
+    return `<tr><td><span class="num" style="font-weight:600">${esc(p.t)}</span> <span class="muted" style="font-size:12px">${esc(p.n.slice(0,22))}</span>${fl?`<span class="flag">${fl}</span>`:""}</td><td class="r num">${p.q.toLocaleString()}</td><td class="r num">${isNaN(p.px)?"—":p.px.toFixed(2)}</td><td class="r num ${cls(dc)}">${pct(dc)}</td><td class="r num">${fmt$(p.mv)}</td><td class="r num ${cls(u)}">${isNaN(u)?"—":fmtS$(u)+`<br><span style="font-size:11px">${pct(u/Math.abs(p.costTotal)*100,1)}</span>`}</td><td class="r num">${(p.mv/S.total*100).toFixed(1)}%</td></tr>`; }).join("") : `<tr><td colspan="7" class="muted">No positions file loaded.</td></tr>`)+
     `<tr><td>Cash &amp; sweep</td><td></td><td></td><td></td><td class="r num">${fmt$(S.cash)}</td><td></td><td class="r num">${S.total?(S.cash/S.total*100).toFixed(1):"0.0"}%</td></tr></tbody>`;
 
   // P&L
@@ -711,7 +741,7 @@ function render(){
     (S.income!=null?` Dividends and interest ${fmtS$(S.income,2)}; fees ${fmt$(S.fees,2)}.`:"");
   drawPnl();
 
-  drawJournal(); drawAttn();
+  drawExposure(); drawFilings(); drawYear(); drawJournal(); drawAttn();
   $("#dateLine").textContent = "Saturday, November 21, 2026 · markets closed for the weekend";
   $("#session").innerHTML = "Next session <b>Mon Nov 23 · 8:30 AM CT</b><br>Futures reopen Sun 5:00 PM CT";
 }
@@ -753,6 +783,8 @@ const newsHold = [
 ];
 $("#newsHold").innerHTML = newsHold.map(n=>`<li><span class="htag${watch.includes(n[0])?" w":""}">${n[0]}</span><div class="grow"><a href="${n[3]}" target="_blank" rel="noopener">${esc(n[1])}</a><div class="src">${n[2]}${watch.includes(n[0])?" · watchlist":" · holding"}</div></div></li>`).join("");
 const blogs = [
+  ["Barron's · newsletter via Gmail","The week ahead: PCE and a holiday tape","https://mail.google.com/mail/u/0/#inbox"],
+  ["The Daily Shot · newsletter via Gmail","Daily Shot Brief, November 20","https://mail.google.com/mail/u/0/#inbox"],
   ["The Daily Shot","Chart pack: breadth improving outside mega-cap tech","https://dailyshotbrief.com/"],
   ["Stratechery","Why hyperscaler capex keeps surprising to the upside","https://stratechery.com/"],
   ["Calculated Risk","Existing home sales preview","https://www.calculatedriskblog.com/"]
@@ -761,27 +793,38 @@ $("#newsBlogs").innerHTML = blogs.map(n=>`<li><div class="grow"><a href="${n[2]}
 const events = [
   {d:"2026-11-23",tm:"8:30 AM",l:"Chicago Fed National Activity",k:"econ"},
   {d:"2026-11-24",tm:"9:00 AM",l:"Case-Shiller home prices; Consumer confidence",k:"econ"},
-  {d:"2026-11-25",tm:"7:30 AM",l:"Core PCE, GDP 2nd est., jobless claims",k:"econ",hi:true},
-  {d:"2026-11-25",tm:"1:00 PM",l:"FOMC minutes",k:"econ",hi:true},
+  {d:"2026-11-25",tm:"7:30 AM",l:"Core PCE, GDP 2nd est., jobless claims",k:"econ",hi:true,link:"https://www.bea.gov/news/schedule"},
+  {d:"2026-11-25",tm:"1:00 PM",l:"FOMC minutes",k:"econ",hi:true,link:"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"},
   {d:"2026-11-26",tm:"All day",l:"Thanksgiving · U.S. markets closed",k:"hol"},
   {d:"2026-11-27",tm:"12:00 PM",l:"Early close",k:"hol"},
   {d:"2026-12-03",tm:"After close",l:"COST earnings",sym:"COST",k:"earn",hi:true},
-  {d:"2026-12-04",tm:"7:30 AM",l:"November jobs report",k:"econ",hi:true},
-  {d:"2026-12-11",tm:"After close",l:"AVGO earnings",sym:"AVGO",k:"earn",hi:true},
-  {d:"2026-12-16",tm:"1:00 PM",l:"FOMC decision",k:"econ",hi:true}
+  {d:"2026-12-04",tm:"7:30 AM",l:"November jobs report",k:"econ",hi:true,link:"https://www.bls.gov/schedule/news_release/empsit.htm"},
+  {d:"2026-12-09",tm:"1:00 PM",l:"FOMC decision",k:"econ",hi:true,link:"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"},
+  {d:"2026-12-11",tm:"After close",l:"AVGO earnings",sym:"AVGO",k:"earn",hi:true}
 ];
-$("#calList").innerHTML = events.map(e=>{ const d=parse(e.d); return `<li><span class="when">${DOW[d.getDay()]} ${md(d)}<br>${e.tm}</span><div class="grow"><div class="ttl" style="font-weight:${e.hi?600:500}">${e.l}</div></div>${e.k==="earn"?'<span class="chip info">Earnings</span>':e.k==="hol"?'<span class="chip ok">Market</span>':""}</li>`; }).join("");
+events.forEach(e=>{ if(e.sym) e.link=`https://www.nasdaq.com/market-activity/stocks/${e.sym.toLowerCase()}/earnings`; });
+// 2026 FOMC decision days (second day of each meeting)
+["2026-01-28","2026-03-18","2026-04-29","2026-06-17","2026-07-29","2026-09-16","2026-10-28"].forEach(d=>events.push({d,tm:"1:00 PM",l:"FOMC decision",k:"econ",hi:true,link:"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",past:true}));
+const held = sym => S && S.positions.find(p=>p.t===sym);
+const relevant = e => (e.k==="econ"&&e.hi) || (e.k==="earn" && !!held(e.sym));
+$("#calList").innerHTML = events.filter(e=>!e.past).map(e=>{ const d=parse(e.d); return `<li><span class="when">${DOW[d.getDay()]} ${md(d)}<br>${e.tm}</span><div class="grow"><div class="ttl" style="font-weight:${e.hi?600:500}">${e.l}</div></div>${e.k==="earn"?'<span class="chip info">Earnings</span>':e.k==="hol"?'<span class="chip ok">Market</span>':""}</li>`; }).join("");
 
 /* ---------- gmail (example) ---------- */
+const GMAIL="https://mail.google.com/mail/u/0/#inbox";
 const mail = [
-  ["thinkorswim Alerts","NVDA crossed above 185.00","6:12 AM"],
-  ["Schwab","Your November trade confirmations are ready","Fri"],
-  ["Barron's","The week ahead: PCE and a holiday tape","Fri"],
-  ["The Daily Shot","Daily Shot Brief, November 20","Fri"],
-  ["Schwab","Action needed: re-authorize your API connection by Nov 24","Thu"]
+  {id:"m1",from:"thinkorswim Alerts",subj:"NVDA crossed above 185.00",when:"6:12 AM",kind:"alert"},
+  {id:"m2",from:"Schwab",subj:"Action needed: re-authorize your API connection by Nov 24",when:"Thu",kind:"broker"},
+  {id:"m3",from:"thinkorswim Alerts",subj:"XOM fell below 109.00",when:"Fri",kind:"alert"},
+  {id:"m4",from:"Schwab",subj:"Your November trade confirmations are ready",when:"Fri",kind:"broker"}
 ];
-$("#mailCount").textContent = mail.length+" unread";
-$("#mailList").innerHTML = mail.map(m=>`<li><span class="dot"></span><div class="grow"><div class="from">${m[0]}<span>${m[2]}</span></div><div class="subj"><a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener">${esc(m[1])}</a></div></div></li>`).join("");
+let reviewed = store.get("cos-reviewed",[]);
+function drawMail(){
+  $("#mailCount").textContent = mail.length+" unread";
+  $("#mailList").innerHTML = mail.map(m=>{ const done=reviewed.includes(m.id); return `<li><span class="dot"></span><div class="grow"><div class="from">${m.from}<span>${m.when}</span></div><div class="subj"><a href="${GMAIL}" target="_blank" rel="noopener">${esc(m.subj)}</a></div></div><button class="btn ghost rv" data-mid="${m.id}" ${done?"disabled":""}>${done?"In to-do":"Review"}</button></li>`; }).join("");
+}
+$("#mailList").addEventListener("click",e=>{ const b=e.target.closest("[data-mid]"); if(!b||b.disabled) return; const m=mail.find(x=>x.id===b.dataset.mid);
+  todos.push({id:Date.now(),t:`Review: ${m.subj} (${m.from})`,p:m.kind==="alert"?"high":"med",due:"2026-11-23",link:GMAIL,done:false}); store.set("cos-todos",todos);
+  reviewed.push(m.id); store.set("cos-reviewed",reviewed); drawMail(); drawTodos(); drawAttn(); });
 
 /* ---------- trips ---------- */
 const DEFAULT_TRIPS = [
@@ -791,17 +834,24 @@ const DEFAULT_TRIPS = [
   {id:"t4",n:"Jackson Hole",s:"2026-08-20",e:"2026-08-24"},
   {id:"t5",n:"New York · client dinners",s:"2026-10-13",e:"2026-10-15"},
   {id:"t6",n:"Dallas · Thanksgiving",s:"2026-11-25",e:"2026-11-29"},
+  {id:"t10",n:"Miami · Art Basel",s:"2026-12-02",e:"2026-12-04"},
   {id:"t7",n:"Vail · ski week",s:"2026-12-14",e:"2026-12-19"},
   {id:"t8",n:"London",s:"2027-02-08",e:"2027-02-14"},
   {id:"t9",n:"Augusta · the Masters",s:"2027-04-08",e:"2027-04-11"}
 ];
 let trips = store.get("cos-trips",DEFAULT_TRIPS);
-const keyDates = new Set(events.filter(e=>e.hi).map(e=>e.d).concat(["2026-01-28","2026-03-18","2026-04-29","2026-06-17","2026-07-29","2026-09-16","2026-10-28","2026-12-16","2027-01-27","2027-03-17"]));
+
 let yr = store.get("cos-yr",2026);
 function inTrip(ds){ return trips.find(t=>ds>=t.s && ds<=t.e); }
-function tripConflicts(t){ const out=[]; for(let d=parse(t.s); d<=parse(t.e); d.setDate(d.getDate()+1)){ if(keyDates.has(iso(d))) out.push(iso(d)); } return out; }
+function tripConflicts(t){ return events.filter(e=>relevant(e) && e.d>=t.s && e.d<=t.e).sort((a,b)=>a.d<b.d?-1:1); }
+function conflictText(t,e){ const p=e.sym&&held(e.sym), d=parse(e.d);
+  return `You're in ${esc(t.n.split(" · ")[0])} during <b>${e.l}</b> · ${DOW[d.getDay()]} ${md(d)}, ${e.tm.replace("After close","after close")}${p?` · ${(p.mv/S.total*100).toFixed(1)}% of the account`:""}`; }
+function upcomingConflicts(){ const out=[]; trips.filter(t=>parse(t.e)>=TODAY).forEach(t=>tripConflicts(t).forEach(e=>{ if(parse(e.d)>=TODAY) out.push({t,e}); })); return out.sort((a,b)=>a.e.d<b.e.d?-1:1); }
 function drawYear(){
   $("#yLbl").textContent = yr;
+  const keyDates = new Set(events.filter(relevant).map(e=>e.d));
+  const cf0 = upcomingConflicts();
+  $("#conflicts").innerHTML = cf0.length? cf0.slice(0,4).map(c=>`<div class="cflct">${conflictText(c.t,c.e)}${c.e.link?` · <a href="${c.e.link}" target="_blank" rel="noopener">event ↗</a>`:""}</div>`).join("") : "";
   let h=""; for(let mo=0;mo<12;mo++){ const first=new Date(yr,mo,1), dim=new Date(yr,mo+1,0).getDate(); let tripDays=0; let cells="SMTWTFS".split("").map(c=>`<div class="dow">${c}</div>`).join("");
     for(let i=0;i<first.getDay();i++) cells+="<div></div>";
     for(let d=1;d<=dim;d++){ const dt=new Date(yr,mo,d), ds=iso(dt), t=inTrip(ds); if(t) tripDays++;
@@ -812,7 +862,7 @@ function drawYear(){
   const list = trips.filter(t=>t.s.startsWith(yr)||t.e.startsWith(yr)).sort((a,b)=>a.s<b.s?-1:1);
   const upcoming = list.filter(x=>parse(x.s)>=TODAY)[0];
   $("#tripList").innerHTML = list.length? list.map(t=>{ const s=parse(t.s), e=parse(t.e), past=e<TODAY, cf=tripConflicts(t);
-    return `<li style="${past?"opacity:.55":""}"><div class="grow"><div class="ttl">${esc(t.n)}</div><div class="meta">${md(s)} – ${md(e)} · ${Math.round((e-s)/864e5)+1} days${cf.length?` · <span style="color:var(--warn)">overlaps ${cf.map(d=>md(parse(d))).join(", ")}</span>`:""}</div></div>${t===upcoming?'<span class="chip trip">Next</span>':""}<button class="x" data-del="${t.id}" aria-label="Remove ${esc(t.n)}">×</button></li>`; }).join("") : `<li class="meta">No trips in ${yr} yet. Add one below.</li>`;
+    return `<li style="${past?"opacity:.55":""}"><div class="grow"><div class="ttl">${esc(t.n)}</div><div class="meta">${md(s)} – ${md(e)} · ${Math.round((e-s)/864e5)+1} days${cf.length?` · <span style="color:var(--warn)">overlaps ${cf.map(e=>`${esc(e.sym||e.l)} ${md(parse(e.d))}`).join(", ")}</span>`:""}</div></div>${t===upcoming?'<span class="chip trip">Next</span>':""}<button class="x" data-del="${t.id}" aria-label="Remove ${esc(t.n)}">×</button></li>`; }).join("") : `<li class="meta">No trips in ${yr} yet. Add one below.</li>`;
 }
 $("#yPrev").onclick=()=>{ yr--; store.set("cos-yr",yr); drawYear(); };
 $("#yNext").onclick=()=>{ yr++; store.set("cos-yr",yr); drawYear(); };
@@ -836,7 +886,7 @@ function drawTodos(){
   let list=todos.slice().sort((a,b)=>(a.done-b.done)||(rank[a.p]-rank[b.p])||((a.due||"9")<(b.due||"9")?-1:1));
   if(tf==="open") list=list.filter(x=>!x.done); if(tf==="today") list=list.filter(x=>!x.done && x.due && x.due<=next);
   $("#todoList").innerHTML = list.length? list.map(x=>{ const od=x.due && x.due<t0 && !x.done;
-    return `<li class="${x.done?"done":""}"><input type="checkbox" id="td${x.id}" data-id="${x.id}" ${x.done?"checked":""}><label for="td${x.id}" class="grow"><div class="ttl">${esc(x.t)}</div>${x.due?`<div class="meta" style="${od?"color:var(--loss)":""}">Due ${md(parse(x.due))}${od?" · overdue":""}</div>`:""}</label><span class="pri ${x.p}">${x.p}</span><button class="x" data-del="${x.id}" aria-label="Delete task">×</button></li>`; }).join("") : `<li class="meta">Nothing here. Add a task above.</li>`;
+    return `<li class="${x.done?"done":""}"><input type="checkbox" id="td${x.id}" data-id="${x.id}" ${x.done?"checked":""}><label for="td${x.id}" class="grow"><div class="ttl">${esc(x.t)}</div>${x.due||x.link?`<div class="meta" style="${od?"color:var(--loss)":""}">${x.due?`Due ${md(parse(x.due))}${od?" · overdue":""}`:""}${x.link?`${x.due?" · ":""}<a href="${x.link}" target="_blank" rel="noopener">Open email ↗</a>`:""}</div>`:""}</label><span class="pri ${x.p}">${x.p}</span><button class="x" data-del="${x.id}" aria-label="Delete task">×</button></li>`; }).join("") : `<li class="meta">Nothing here. Add a task above.</li>`;
   $("#todoCount").textContent = todos.filter(x=>!x.done).length+" open";
   document.querySelectorAll("#todoFilter button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.f===tf)));
 }
@@ -850,13 +900,51 @@ function drawAttn(){
   if(!S) return;
   const items=[];
   if(S.src!=="sample"){ const bad=S.recon.filter(r=>r[0]==="bad"||r[0]==="warn").length; if(bad) items.push(["hi",`${bad} reconciliation item${bad>1?"s":""} to check on the Schwab export`]); }
+  upcomingConflicts().filter(c=>c.e.k==="earn"||c.e.l==="FOMC decision").slice(0,2).forEach(c=>items.push(["tr",conflictText(c.t,c.e)+(c.e.link?` · <a href="${c.e.link}" target="_blank" rel="noopener">event ↗</a>`:"")]));
   todos.filter(x=>!x.done && x.p==="high").forEach(x=>items.push(["hi",esc(x.t)]));
-  events.filter(e=>e.k==="earn" && parse(e.d)>=TODAY).forEach(e=>{ const p=S.positions.find(p=>p.t===e.sym); if(p) items.push(["md",`${e.sym} reports ${md(parse(e.d))} ${e.tm.toLowerCase()} · ${(p.mv/S.total*100).toFixed(1)}% of the account`]); });
+  optionExpiries().filter(o=>o.days<=7).forEach(o=>items.push(["hi",`${esc(o.label)} expires ${md(o.d)} (${o.days} day${o.days===1?"":"s"}) · <a href="https://trade.thinkorswim.com/" target="_blank" rel="noopener">thinkorswim ↗</a>`]));
+  events.filter(e=>e.k==="earn" && !e.past && parse(e.d)>=TODAY).forEach(e=>{ const p=held(e.sym); if(p) items.push(["md",`${e.sym} reports ${md(parse(e.d))} ${e.tm.toLowerCase()} · ${(p.mv/S.total*100).toFixed(1)}% of the account`]); });
+  if(S.orders&&S.orders.length) items.push(["", `${S.orders.length} open orders working in thinkorswim`]);
   items.push(["md","Wed Nov 25: Core PCE 7:30 AM CT, FOMC minutes 1:00 PM CT"]);
-  const nt=trips.filter(t=>parse(t.e)>=TODAY).sort((a,b)=>a.s<b.s?-1:1)[0];
-  if(nt){ const cf=tripConflicts(nt); const dd=Math.round((parse(nt.s)-TODAY)/864e5); items.push(["tr",`${esc(nt.n)} ${dd>0?`in ${dd} days`:"now"}${cf.length?` · overlaps ${cf.map(d=>md(parse(d))).join(", ")}`:""}`]); }
-  items.push(["", `${mail.length} unread from your senders, 1 price alert`]);
-  $("#qAttn").innerHTML = items.slice(0,5).map(i=>`<li class="${i[0]}">${i[1]}</li>`).join("");
+  const alerts=mail.filter(m=>m.kind==="alert"&&!reviewed.includes(m.id)).length;
+  items.push(["", `${mail.length} unread from your senders${alerts?`, ${alerts} price alert${alerts>1?"s":""}`:""}`]);
+  $("#qAttn").innerHTML = items.slice(0,6).map(i=>`<li class="${i[0]}">${i[1]}</li>`).join("");
+}
+
+/* ---------- exposure ---------- */
+function optionExpiries(){ if(!S) return [];
+  return S.positions.map(p=>{ const m=p.t.match(/^(\S+)\s+(\d{2})\/(\d{2})\/(\d{4})\s+([\d.]+)\s+([CP])$/); if(!m) return null;
+    const d=new Date(+m[4],+m[2]-1,+m[3]); return {p,d,days:Math.round((d-TODAY)/864e5),label:`${m[1]} ${+m[5]} ${m[6]==="C"?"call":"put"}`,short:p.q<0}; })
+    .filter(Boolean).sort((a,b)=>a.d-b.d); }
+function drawExposure(){
+  const ps=S.positions.slice().sort((a,b)=>b.mv-a.mv), T=S.total||1;
+  const top5=ps.slice(0,5).reduce((a,p)=>a+p.mv,0)/T*100;
+  const groups={}; ps.forEach(p=>{ groups[p.grp]=(groups[p.grp]||0)+p.mv; });
+  const g=Object.entries(groups).sort((a,b)=>b[1]-a[1])[0]||["—",0];
+  const big=ps[0];
+  $("#xStats").innerHTML = stat("Top 5 holdings",`${top5.toFixed(1)}%`,ps.slice(0,5).map(p=>esc(p.t.split(" ")[0])).join(", ")||"no positions")+
+    stat(`Largest ${S.grpLabel==="sector"?"sector":"group"}`,`${(g[1]/T*100).toFixed(1)}%`,esc(g[0]))+
+    stat("Cash",`${(S.cash/T*100).toFixed(1)}%`,fmt$(S.cash))+
+    stat("Largest position",big?`${(big.mv/T*100).toFixed(1)}%`:"—",big?esc(big.t.split(" ")[0]):"");
+  const mv=S.positions.filter(p=>p.day).slice().sort((a,b)=>Math.abs(b.day)-Math.abs(a.day)).slice(0,7);
+  const mx=Math.max(1,...mv.map(p=>Math.abs(p.day))), tot=S.positions.reduce((a,p)=>a+(p.day||0),0);
+  $("#moves").innerHTML = mv.length? mv.map(p=>`<li class="mv" title="${esc(p.t)}"><span class="tkr">${esc(p.t.replace(/(\d{2}\/\d{2})\/\d{4} ([\d.]+)0* ([CP])$/,"$1 $2$3"))}</span><span class="track"><i class="${p.day>0?"up":"dn"}" style="width:${Math.abs(p.day)/mx*49}%"></i></span><span class="num ${cls(p.day)}">${fmtS$(p.day)}</span></li>`).join("") : `<li class="meta">No day change in the positions file.</li>`;
+  $("#movesNote").innerHTML = mv.length? `Account moved <b class="${cls(tot)} num">${fmtS$(tot)}</b>. Top ${mv.length} contributors by dollar change.` : "";
+  const ex=optionExpiries();
+  $("#expList").innerHTML = ex.length? ex.map(o=>`<li><div class="grow"><div class="ttl">${o.short?"Short ":""}${esc(o.label)}</div><div class="meta">${Math.abs(o.p.q)} contract${Math.abs(o.p.q)>1?"s":""} · ${fmt$(o.p.mv)} · expires ${DOW[o.d.getDay()]} ${md(o.d)}</div></div><span class="chip ${o.days<=7?"bad":o.days<=30?"":"ok"}">${o.days} day${o.days===1?"":"s"}</span></li>`).join("") : `<li class="meta">No option positions.</li>`;
+  const real=S.src!=="sample"; $("#ordChip").hidden=real;
+  $("#ordList").innerHTML = real? `<li class="meta">Open orders come with the Schwab API sync. Exports don't include them.</li>` :
+    S.orders.map(o=>`<li><div class="grow"><div class="ttl"><span class="num">${o.t}</span> · ${o.side} ${o.q} ${o.type} @ ${o.px.toFixed(2)}</div><div class="meta">${o.tif}${held(o.t)?` · last ${held(o.t).px.toFixed(2)}, ${pct((o.px/held(o.t).px-1)*100,1)} away`:""}</div></div></li>`).join("")+`<li><a href="https://trade.thinkorswim.com/" target="_blank" rel="noopener">Manage orders in thinkorswim ↗</a></li>`;
+}
+const EDGAR=(t,f)=>`https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${encodeURIComponent(t)}&type=${encodeURIComponent(f||"")}&dateb=&owner=include&count=40`;
+function drawFilings(){
+  if(S.src==="sample"){
+    const f=[["NVDA","4","Director sold 12,000 shares (Form 4)","Fri 5:12 PM ET"],["COST","8-K","Monthly sales results for November period","Thu 4:15 PM ET"],["JPM","8-K","Executive appointment","Wed 4:30 PM ET"],["PLTR","SC 13G/A","Amended ownership filing by large holder","Wed 9:02 AM ET"]];
+    $("#filings").innerHTML = f.map(x=>`<li><span class="htag${watch.includes(x[0])?" w":""}">${x[0]}</span><div class="grow"><a href="${EDGAR(x[0],x[1])}" target="_blank" rel="noopener">${esc(x[2])}</a><div class="src">Form ${x[1]} · ${x[3]} · SEC EDGAR</div></div></li>`).join("");
+  } else {
+    const ts=[...new Set(S.positions.filter(p=>p.grp==="Stocks").sort((a,b)=>b.mv-a.mv).map(p=>p.t))].slice(0,6).concat(watch);
+    $("#filings").innerHTML = ts.map(t=>`<li><span class="htag${watch.includes(t)?" w":""}">${esc(t)}</span><div class="grow"><a href="${EDGAR(t)}" target="_blank" rel="noopener">Latest filings on EDGAR</a><div class="src">${watch.includes(t)?"watchlist":"holding"} · live feed arrives with the brief integration</div></div></li>`).join("");
+  }
 }
 
 /* ---------- journal ---------- */
@@ -919,6 +1007,6 @@ $("#startVal").value = startInput;
 $("#startVal").addEventListener("change",e=>{ startInput=e.target.value; store.set("cos-start",startInput); rebuild(); });
 $("#resetData").addEventListener("click",()=>{ files={}; store.del("cos-files"); rebuild(); msg("Back to sample data. His files were removed from this browser."); });
 
-drawTodos(); drawYear(); rebuild();
+drawTodos(); drawMail(); rebuild();
 })();
 </script>

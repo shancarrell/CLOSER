@@ -1,6 +1,6 @@
 "Date","Action","Symbol","Description","Quantity","Price","Fees & Comm","Amount"
 "11/20/2026","Sell","NVDA","NVIDIA CORP","200","$185.40","$0.66","$37,079.34"
-"11/18/2026","Buy to Open","SPY 12/19/2026 590.00 P","PUT SPDR S&P 500","2","$6.50","$1.30","-$1,301.30"
+"11/18/2026","Buy to Open","SPY 12/18/2026 590.00 P","PUT SPDR S&P 500","2","$6.50","$1.30","-$1,301.30"
 "11/16/2026","Sell","TSLA","TESLA INC","50","$338.20","$0.33","$16,909.67"
 "10/30/2026","Qualified Dividend","AAPL","APPLE INC","","","","$78.00"
 "10/02/2026","Buy","TSLA","TESLA INC","50","$352.75","","-$17,637.50"
