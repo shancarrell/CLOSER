@@ -1,0 +1,924 @@
+<title>Colby's Chief of Staff</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: pre-market briefing. Three answers up top, then a two-column desk:
+   wide working panels on the left, short lists on the right, full-width journal and travel year below. */
+:root{
+  --bg:#eef1f0; --surface:#ffffff; --sunk:#f5f7f6; --ink:#121a17; --ink-2:#4d5955; --muted:#7a8682;
+  --line:#dbe1de; --accent:#2a5bd7; --accent-soft:#e3eafb;
+  --gain:#167a46; --loss:#c23a2e; --warn:#a86a06; --gain-soft:#e2f2e9; --loss-soft:#fbe7e4; --warn-soft:#fbf0dc;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --bench:#9aa5a1;
+  --trip:#6250d6; --trip-soft:#ebe8fb;
+  --f-display:"Manrope", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Inter", "Segoe UI", system-ui, sans-serif;
+  --f-num:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d1214; --surface:#151c1f; --sunk:#11171a; --ink:#e7edeb; --ink-2:#b2bdb9; --muted:#85918d;
+  --line:#26313a; --accent:#7f9dff; --accent-soft:#1c2645;
+  --gain:#45c483; --loss:#f07a6c; --warn:#e2aa4c; --gain-soft:#14301f; --loss-soft:#3a1c19; --warn-soft:#362a12;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --bench:#5e6a67;
+  --trip:#9085e9; --trip-soft:#25213f; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1214; --surface:#151c1f; --sunk:#11171a; --ink:#e7edeb; --ink-2:#b2bdb9; --muted:#85918d;
+  --line:#26313a; --accent:#7f9dff; --accent-soft:#1c2645;
+  --gain:#45c483; --loss:#f07a6c; --warn:#e2aa4c; --gain-soft:#14301f; --loss-soft:#3a1c19; --warn-soft:#362a12;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --bench:#5e6a67;
+  --trip:#9085e9; --trip-soft:#25213f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.gain{color:var(--gain)} .loss{color:var(--loss)} .muted{color:var(--muted)}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:10px;border-radius:2px;background:var(--accent);display:inline-block}
+.nav{display:flex;gap:2px;flex-wrap:wrap;margin-left:auto}
+.nav a{color:var(--ink-2);padding:5px 9px;border-radius:6px;font-size:13px}
+.nav a:hover{background:var(--sunk);text-decoration:none;color:var(--ink)}
+.sync{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--gain-soft);color:var(--gain)} .chip.info{background:var(--accent-soft);color:var(--accent)}
+.chip.bad{background:var(--loss-soft);color:var(--loss)} .chip.trip{background:var(--trip-soft);color:var(--trip)}
+
+/* hero */
+.hello{padding-block:26px 6px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.hello h1{font-family:var(--f-display);font-size:clamp(24px,3.2vw,34px);line-height:1.1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.hello p{margin:6px 0 0;color:var(--ink-2)}
+.session{font-size:13px;color:var(--ink-2);text-align:right}
+.session b{font-family:var(--f-num);font-weight:600;color:var(--ink)}
+.sample-note{margin:14px 0 0;font-size:12.5px;color:var(--ink-2);background:var(--warn-soft);border-radius:8px;padding:8px 12px}
+.sample-note b{color:var(--warn)}
+
+/* three questions */
+.qs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding-block:18px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.q h2{font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0}
+.q .big{font-family:var(--f-num);font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.05}
+.q .row{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.q .row b{font-family:var(--f-num);font-weight:600}
+.q ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.q li{display:flex;gap:9px;align-items:baseline;font-size:13.5px}
+.q li .tag{flex:none;font-family:var(--f-num);font-size:11px;font-weight:600;width:52px;color:var(--muted)}
+.attn li{padding:7px 10px;border-radius:7px;background:var(--sunk);border-left:3px solid var(--line);align-items:center}
+.attn li.hi{border-left-color:var(--loss)} .attn li.md{border-left-color:var(--warn)} .attn li.tr{border-left-color:var(--trip)}
+
+/* desk grid */
+.desk{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;padding-bottom:14px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0;scroll-margin-top:70px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.ph h2{font-family:var(--f-display);font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em}
+.ph .sub{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{border:0;background:transparent;padding:4px 10px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.stat{background:var(--surface);padding:10px 12px;min-width:0}
+.stat .k{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stat .v{font-family:var(--f-num);font-size:18px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .d{font-size:12px;color:var(--ink-2)}
+
+/* charts */
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.axis text{fill:var(--muted);font-family:var(--f-num);font-size:10.5px}
+.grid line{stroke:var(--line);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .1s}
+.tip.on{opacity:1}
+.tip b{font-family:var(--f-num)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.legend i.line{height:2px;width:14px;border-radius:1px}
+.legend i.dash{height:0;width:14px;border-top:2px dashed var(--bench);background:none!important}
+
+.alloc{display:flex;height:14px;border-radius:4px;overflow:hidden;gap:2px;margin:6px 0 8px}
+.alloc div{height:100%}
+
+/* tables */
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th.r,td.r{text-align:right}
+.tk{font-family:var(--f-num);font-weight:600;background:none;border:0;padding:0;color:var(--accent);cursor:pointer}
+.tk:hover{text-decoration:underline}
+.flag{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--warn-soft);color:var(--warn);margin-left:6px;letter-spacing:.03em}
+
+/* lists */
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;min-width:0}
+.list li:last-child{border-bottom:0}
+.grow{flex:1;min-width:0}
+.ttl{font-weight:600;font-size:13.5px}
+.meta{font-size:12px;color:var(--muted)}
+.mail .from{font-weight:600;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.mail .from span{font-weight:400;font-size:11.5px;color:var(--muted);font-family:var(--f-num)}
+.mail .subj{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none;margin-top:6px}
+.count{font-family:var(--f-num);font-weight:600;font-size:12px;background:var(--accent);color:var(--surface);border-radius:99px;padding:1px 8px}
+
+/* todo */
+.todo-add{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.todo-add input[type=text]{flex:1 1 140px;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--sunk)}
+.todo-add select,.todo-add input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--sunk);font-size:12.5px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:7px;padding:6px 12px;font-weight:600;font-size:12.5px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.todo li{align-items:center}
+.todo input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none;margin:0}
+.todo li.done .ttl{text-decoration:line-through;color:var(--muted);font-weight:400}
+.pri{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;flex:none}
+.pri.high{background:var(--loss-soft);color:var(--loss)} .pri.med{background:var(--warn-soft);color:var(--warn)} .pri.low{background:var(--sunk);color:var(--muted)}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;flex:none}
+.x:hover{color:var(--loss)}
+.filters{display:flex;gap:6px;margin:4px 0 2px}
+
+/* brief */
+.regions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.region{background:var(--sunk);border-radius:8px;padding:10px 12px;min-width:0}
+.region h3{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.idx{display:flex;justify-content:space-between;font-size:13px;gap:8px}
+.idx .num{font-weight:500}
+.brief-h{font-family:var(--f-display);font-size:13px;font-weight:700;margin:14px 0 4px;letter-spacing:.02em}
+.drivers{margin:0;padding-left:18px;color:var(--ink-2);max-width:72ch}
+.drivers li{margin-bottom:4px}
+.news .src{font-size:11.5px;color:var(--muted)}
+.htag{font-family:var(--f-num);font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent);flex:none;margin-top:2px}
+.htag.w{background:var(--sunk);color:var(--ink-2)}
+.cal li{align-items:center}
+.cal .when{font-family:var(--f-num);font-size:11.5px;color:var(--muted);width:74px;flex:none}
+
+/* journal drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:20;padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 20px;overflow-y:auto;box-shadow:-12px 0 32px rgba(0,0,0,.18);transform:translateX(102%);transition:transform .2s ease}
+.drawer.open{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:19}
+.drawer h3{font-family:var(--f-display);font-size:22px;margin:0}
+.fill{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px}
+.fill .hd{display:flex;justify-content:space-between;font-size:12.5px}
+.note{margin-top:8px;font-size:13px;color:var(--ink-2);background:var(--sunk);padding:8px 10px;border-radius:6px;white-space:pre-wrap}
+.drawer textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);padding:8px 10px;font:inherit;font-size:13px;margin-top:6px}
+
+/* travel */
+.year{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.month h4{margin:0 0 6px;font-family:var(--f-display);font-size:13px;font-weight:700;display:flex;justify-content:space-between}
+.month h4 span{font-weight:500;color:var(--muted);font-size:11px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.days div{aspect-ratio:1/1;max-width:100%;font-family:var(--f-num);font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:3px;color:var(--ink-2)}
+.days .dow{color:var(--muted);font-size:9px;aspect-ratio:auto;padding-bottom:2px}
+.days .t{background:var(--trip);color:var(--surface);font-weight:600;cursor:pointer}
+.days .t.fl{box-shadow:inset 0 0 0 2px var(--warn)}
+.days .today{outline:2px solid var(--accent);outline-offset:-2px;color:var(--ink);font-weight:700}
+.days .wk{color:var(--muted)}
+.days .ev{position:relative}
+.days .ev::after{content:"";position:absolute;bottom:2px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--warn)}
+.travel-grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:22px}
+.trip-form{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.trip-form input{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--sunk);font-size:12.5px;min-width:0}
+.trip-form input[type=text]{grid-column:1/-1}
+.trip-form .btn{grid-column:1/-1}
+.yr-nav{display:flex;align-items:center;gap:8px}
+.yr-nav b{font-family:var(--f-num);font-size:15px}
+.yr-nav button{border:1px solid var(--line);background:var(--sunk);border-radius:6px;width:28px;height:28px;cursor:pointer}
+
+
+.databar{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.db-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.db-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;background:var(--sunk);min-width:0}
+.drop u{color:var(--accent)} .drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.startbox{display:flex;flex-direction:column;gap:4px}
+.startbox input{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--sunk);font-family:var(--f-num);width:170px;max-width:100%}
+#dataMsg:empty{display:none}
+.recon{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.rc{display:flex;gap:9px;align-items:flex-start;font-size:13px}
+.rci{flex:none;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+.rc.ok .rci{background:var(--gain-soft);color:var(--gain)} .rc.warn .rci{background:var(--warn-soft);color:var(--warn)}
+.rc.bad .rci{background:var(--loss-soft);color:var(--loss)} .rc.info .rci{background:var(--accent-soft);color:var(--accent)}
+@media (max-width:760px){ .db-row{grid-template-columns:minmax(0,1fr)} }
+.roadmap{padding-bottom:40px}
+.roadmap ol{margin:0;padding-left:20px;color:var(--ink-2);max-width:80ch}
+.roadmap li{margin-bottom:6px}
+footer{font-size:12px;color:var(--muted);padding-bottom:30px}
+
+@media (max-width:1000px){
+  .desk,.travel-grid{grid-template-columns:minmax(0,1fr)}
+  .year{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .qs{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .regions{grid-template-columns:minmax(0,1fr)}
+  .year{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav{display:none}
+  .session{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><i></i>Chief of Staff</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#portfolio">Portfolio</a><a href="#pnl">P&amp;L</a><a href="#brief">Brief</a><a href="#journal">Journal</a><a href="#todo">To-do</a><a href="#mail">Mail</a><a href="#travel">Travel</a>
+    </nav>
+    <div class="sync"><span class="chip" id="srcChip">Sample data</span><span>Schwab sync <b class="num" id="syncTime">—</b></span></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hello">
+    <div>
+      <h1 id="greet">Good morning, Colby</h1>
+      <p id="dateLine"></p>
+    </div>
+    <div class="session" id="session"></div>
+  </section>
+  <p class="sample-note"><b>Prototype.</b> Load Colby's Schwab exports below to put his real numbers in the portfolio, P&amp;L and journal. The brief, Gmail and calendar still show example content until those feeds are connected. Trades still go through thinkorswim; this page is view-only.</p>
+  <section class="databar" aria-label="Schwab data">
+    <div class="db-head"><div><b id="srcLabel">Showing sample data</b><div class="meta" id="srcMeta"></div></div><button class="btn ghost" id="resetData" type="button" hidden>Back to sample data</button></div>
+    <div class="db-row">
+      <label class="drop" id="drop" for="fileIn"><span><b>Drop Schwab CSVs here</b> or <u>choose files</u></span><span class="meta">Positions export (Positions page → Export) and Transactions export (History → Export, Jan 1 to today). Files stay in this browser.</span></label>
+      <input type="file" id="fileIn" multiple accept=".csv,text/csv" hidden>
+      <label class="startbox" for="startVal"><span class="meta">Jan 1 account value<br>(Dec statement ending balance)</span><input id="startVal" type="text" inputmode="decimal" placeholder="$1,102,500"></label>
+    </div>
+    <p class="meta" id="dataMsg" role="status"></p>
+    <ul class="recon" id="recon" hidden></ul>
+  </section>
+
+  <section class="qs" aria-label="Three questions">
+    <article class="q">
+      <h2>How am I doing?</h2>
+      <div class="big num" id="qValue"></div>
+      <div class="row" id="qValueRow"></div>
+      <div class="row" id="qYtdRow"></div>
+    </article>
+    <article class="q">
+      <h2>What changed overnight?</h2>
+      <ul id="qOvernight"></ul>
+    </article>
+    <article class="q attn">
+      <h2>What needs my attention today?</h2>
+      <ul id="qAttn"></ul>
+    </article>
+  </section>
+
+  <div class="desk">
+    <div class="col">
+      <section class="panel" id="portfolio">
+        <div class="ph"><div><h2>Portfolio overview</h2><div class="sub" id="acctSub">Schwab · source of truth for totals</div></div>
+          <div class="seg" id="perfRange" role="group" aria-label="Chart range"><button data-r="21">1M</button><button data-r="63">3M</button><button data-r="all" aria-pressed="true">YTD</button></div></div>
+        <div class="stats" id="pStats"></div>
+        <div class="chart" id="perfChart"></div>
+        <div class="legend" id="perfLegend"></div>
+        <h3 class="brief-h" style="margin-top:20px" id="allocHead">Allocation</h3>
+        <div class="alloc" id="allocBar"></div>
+        <div class="legend" id="allocLegend"></div>
+        <h3 class="brief-h" style="margin-top:20px">Open positions</h3>
+        <div class="tbl"><table id="posTable"></table></div>
+      </section>
+
+      <section class="panel" id="pnl">
+        <div class="ph"><div><h2>Profit &amp; loss</h2><div class="sub">Year to date · return adjusts for deposits and withdrawals</div></div>
+          <div class="seg" id="pnlMode" role="group" aria-label="Breakdown"><button data-m="month" aria-pressed="true">Monthly</button><button data-m="week">Weekly</button></div></div>
+        <div class="stats" id="pnlStats"></div>
+        <div class="chart" id="pnlChart"></div>
+        <div class="legend"><span><i style="background:var(--gain)"></i>Realized gain</span><span><i style="background:var(--loss)"></i>Realized loss</span></div>
+        <p class="meta" id="flowNote" style="margin-top:10px"></p>
+      </section>
+
+      <section class="panel" id="brief">
+        <div class="ph"><div><h2>Morning market brief</h2><div class="sub">Compiled 6:45 AM ET · holdings and watchlist first</div></div><span class="chip info">Example headlines</span></div>
+        <div class="regions" id="regions"></div>
+        <h3 class="brief-h">What's driving U.S. markets</h3>
+        <ol class="drivers" id="drivers"></ol>
+        <h3 class="brief-h">Your holdings &amp; watchlist</h3>
+        <ul class="list news" id="newsHold"></ul>
+        <h3 class="brief-h">From your sites and blogs</h3>
+        <ul class="list news" id="newsBlogs"></ul>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" id="todo">
+        <div class="ph"><h2>To-do</h2><span class="sub" id="todoCount"></span></div>
+        <form class="todo-add" id="todoForm">
+          <input type="text" id="todoText" placeholder="Add a task" aria-label="New task" required>
+          <select id="todoPri" aria-label="Priority"><option value="high">High</option><option value="med" selected>Med</option><option value="low">Low</option></select>
+          <input type="date" id="todoDue" aria-label="Due date">
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <div class="filters seg" id="todoFilter" role="group" aria-label="Show"><button data-f="open" aria-pressed="true">Open</button><button data-f="today">Due today</button><button data-f="all">All</button></div>
+        <ul class="list todo" id="todoList"></ul>
+        <p class="meta">Saved in this browser only for now.</p>
+      </section>
+
+      <section class="panel" id="mail">
+        <div class="ph"><div><h2>Unread Gmail</h2><div class="sub">From chosen senders only</div></div><span style="display:flex;gap:6px;align-items:center"><span class="chip info">Example</span><span class="count" id="mailCount"></span></span></div>
+        <ul class="list mail" id="mailList"></ul>
+        <p class="meta">Senders: Schwab, thinkorswim alerts, Barron's, The Daily Shot, Stratechery. Opens in Gmail.</p>
+      </section>
+
+      <section class="panel" id="calendar">
+        <div class="ph"><h2>Earnings &amp; economic calendar</h2><span class="chip info">Example</span></div>
+        <ul class="list cal" id="calList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel" id="journal" style="margin-bottom:14px">
+    <div class="ph"><div><h2>Trade journal</h2><div class="sub">Executed trades from thinkorswim, via Schwab · click a ticker for entries, exits and notes</div></div>
+      <div class="seg" id="jRange" role="group" aria-label="Period"><button data-p="day">Day</button><button data-p="week">Week</button><button data-p="month" aria-pressed="true">Month</button><button data-p="year">Year</button></div></div>
+    <div class="stats" id="jStats"></div>
+    <div class="tbl"><table id="jTable"></table></div>
+  </section>
+
+  <section class="panel" id="travel" style="margin-bottom:14px">
+    <div class="ph"><div><h2>Travel calendar</h2><div class="sub">Amber ring = trip overlaps an earnings date or Fed meeting on his book</div></div>
+      <div class="yr-nav"><button id="yPrev" aria-label="Previous year">‹</button><b id="yLbl"></b><button id="yNext" aria-label="Next year">›</button></div></div>
+    <div class="travel-grid">
+      <div class="year" id="yearGrid"></div>
+      <div>
+        <h3 class="brief-h" style="margin-top:0">Trips</h3>
+        <ul class="list" id="tripList"></ul>
+        <form class="trip-form" id="tripForm">
+          <input type="text" id="tripName" placeholder="Trip (e.g. Denver, ski week)" aria-label="Trip name" required>
+          <input type="date" id="tripStart" aria-label="Start date" required>
+          <input type="date" id="tripEnd" aria-label="End date" required>
+          <button class="btn ghost" type="submit">Add trip</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel roadmap">
+    <div class="ph"><h2>Build order</h2></div>
+    <ol>
+      <li><b>Reconcile first.</b> Load a Schwab transactions CSV and the latest statement. Totals, cash and positions must match the statement to the cent before anything goes live.</li>
+      <li><b>Morning brief.</b> Market data, earnings and economic calendars, plus RSS from his chosen sites, compiled by 6:45 AM ET and ranked by his holdings and watchlist.</li>
+      <li><b>Schwab Trader API.</b> Read-only sync of balances, positions, orders and transactions. Confirm how far back transaction history goes before promising a full-year journal.</li>
+      <li><b>Gmail.</b> Read-only access, filtered to unread mail from his sender list.</li>
+      <li><b>Calendar.</b> Pull trips from his Google Calendar so travel isn't entered twice.</li>
+    </ol>
+  </section>
+  <footer>View-only. No orders are placed from this page.</footer>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Trade detail"></aside>
+
+<script>
+(function(){
+"use strict";
+const TODAY = new Date(2026,10,21); // Sat Nov 21 2026
+const $ = s => document.querySelector(s);
+const fmt$ = (n,d=0) => (n<0?"−$":"$")+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtS$ = (n,d=0) => (n>0?"+":"")+fmt$(n,d);
+const pct = (n,d=2) => (n>0?"+":n<0?"−":"")+Math.abs(n).toFixed(d)+"%";
+const cls = n => n>0?"gain":n<0?"loss":"";
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const md = d => MON[d.getMonth()]+" "+d.getDate();
+const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const store = {
+  get(k,f){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function rng(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+function mondayOf(d){ const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+
+/* ================= Schwab CSV parsing ================= */
+function csvRows(text){
+  const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){ row.push(f); f=""; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=""; }
+    else f+=c; }
+  if(f!==""||row.length){ row.push(f); rows.push(row); }
+  return rows.map(r=>r.map(c=>c.trim()));
+}
+function num(s){ if(s==null) return NaN; s=String(s).trim(); if(!s||/^(--|n\/a|na)$/i.test(s)) return NaN;
+  const neg=/^\(.*\)$/.test(s)||/^-/.test(s.replace(/[$\s]/g,"")); const v=parseFloat(s.replace(/[()$,%\s+]/g,"").replace(/^-/,"")); return isNaN(v)?NaN:(neg?-v:v); }
+function col(h,...regs){ for(const r of regs){ const i=h.findIndex(c=>r.test(c)); if(i>=0) return i; } return -1; }
+function groupOf(type,sym){ if(/option/i.test(type)||/\d+\.\d+ [CP]$/.test(sym)) return "Options"; if(/etf|fund/i.test(type)) return "ETFs & funds"; if(/bond|fixed|treasur|cd/i.test(type)) return "Fixed income"; return "Stocks"; }
+
+function parsePositions(text){
+  const rows=csvRows(text); const head=(rows[0]||[]).join(" ");
+  const hi=rows.findIndex(r=>r.some(c=>/^symbol$/i.test(c)) && r.some(c=>/qty|quantity/i.test(c)) && r.some(c=>/mkt\s*val|market\s*value/i.test(c)));
+  if(hi<0) return null;
+  const h=rows[hi];
+  const I={sym:col(h,/^symbol$/i),desc:col(h,/^description$/i),q:col(h,/^qty\b/i,/^quantity$/i),px:col(h,/^price$/i,/^price\b(?!.*(chng|change))/i),
+    pxc:col(h,/price\s*(chng|change)\s*\$/i,/price\s*(chng|change)\s*\(\$\)/i),mv:col(h,/mkt\s*val/i,/market\s*value/i),cost:col(h,/^cost\s*basis/i),
+    day:col(h,/day\s*(chng|change)\s*\$/i,/day\s*(chng|change)\s*\(\$\)/i),type:col(h,/security\s*type/i)};
+  const out={positions:[],cash:0,total:NaN,asOf:(head.match(/as of\s+(.+?)\s*$/i)||[])[1]||"",account:(head.match(/(\.\.\.\d{3,4}|…\d{3,4}|XXXX-?\d{4}|\d{4})\s+as of/i)||[])[1]||""};
+  for(const r of rows.slice(hi+1)){ const sym=r[I.sym]; if(!sym) continue;
+    const mv=num(r[I.mv]);
+    if(/account\s*total/i.test(sym)){ out.total=mv; continue; }
+    if(/positions?\s*total/i.test(sym)) continue;
+    if(/cash/i.test(sym)){ out.cash+=isNaN(mv)?0:mv; continue; }
+    const q=num(r[I.q]); if(isNaN(q)) continue;
+    const px=num(r[I.px]); const pxc=num(r[I.pxc]); let day=num(r[I.day]); if(isNaN(day)) day=isNaN(pxc)?0:pxc*q;
+    const m=isNaN(mv)?q*px:mv; const cost=num(r[I.cost]);
+    out.positions.push({t:sym,n:r[I.desc]||"",grp:groupOf(r[I.type]||"",sym),q,px,mv:m,day,costTotal:isNaN(cost)?NaN:cost});
+  }
+  return out;
+}
+
+function parseTransactions(text){
+  const rows=csvRows(text);
+  const hi=rows.findIndex(r=>r.some(c=>/^date$/i.test(c)) && r.some(c=>/^action$/i.test(c)));
+  if(hi<0) return null;
+  const h=rows[hi];
+  const I={d:col(h,/^date$/i),a:col(h,/^action$/i),s:col(h,/^symbol$/i),desc:col(h,/^description$/i),q:col(h,/^quantity$/i,/^qty/i),px:col(h,/^price$/i),fee:col(h,/fees/i),amt:col(h,/^amount$/i)};
+  const tx=[];
+  rows.slice(hi+1).forEach((r,k)=>{ const m=(r[I.d]||"").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(!m) return;
+    tx.push({k,d:`${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`,a:r[I.a]||"",s:(r[I.s]||"").trim(),desc:r[I.desc]||"",q:Math.abs(num(r[I.q]))||0,px:num(r[I.px]),fee:num(r[I.fee])||0,amt:num(r[I.amt])||0}); });
+  // Schwab lists newest first; process oldest first, keeping same-day order as it happened
+  tx.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:b.k-a.k);
+  return tx;
+}
+
+function buildFromTx(tx){
+  const lots={}, trades=[], flows=[]; let fees=0, income=0, unmatched=[], id=1;
+  for(const t of tx){ const A=t.a.toLowerCase();
+    if(!t.s){ if(/dividend|interest/.test(A)) income+=t.amt;
+      else if(/moneylink|wire|journal|transfer|deposit|withdraw|funds|ach/.test(A) && t.amt) flows.push({d:t.d,a:t.amt,k:t.amt>0?"Deposit":"Withdrawal"});
+      continue; }
+    if(/dividend|interest|cap gain/.test(A)){ income+=t.amt; continue; }
+    const isBuy=/^buy|reinvest shares/.test(A), isSell=/^sell/.test(A), expired=/expire/.test(A);
+    if(!isBuy && !isSell && !expired) continue;
+    fees+=t.fee;
+    const L=lots[t.s]||(lots[t.s]=[]);
+    let dq = expired ? (L[0]&&L[0].q<0? t.q : -t.q) : (isBuy? t.q : -t.q);
+    const unitIn = expired?0:(t.q? t.amt/t.q : 0);
+    let matched=0, realized=0, entryPx=0; const fills=[];
+    while(dq!==0 && L.length && Math.sign(L[0].q)!==Math.sign(dq)){
+      const lot=L[0], m=Math.min(Math.abs(lot.q),Math.abs(dq));
+      realized+=m*(unitIn+lot.unit); entryPx+=m*(lot.px||0); matched+=m;
+      fills.push([lot.d,lot.a,m,lot.px||0]);
+      lot.q+= lot.q>0?-m:m; dq+= dq>0?-m:m; if(lot.q===0) L.shift(); }
+    const closer = expired || /to close|to cover/.test(A) || (A==="sell") || /^sell$/.test(A);
+    if(dq!==0){
+      if(closer && !(isBuy && !/to cover|to close/.test(A))) unmatched.push({d:t.d,s:t.s,q:Math.abs(dq)});
+      else L.push({q:dq,unit:unitIn,px:t.px,d:t.d,a:t.a}); }
+    if(matched){ fills.push([t.d,t.a,matched,isNaN(t.px)?0:t.px]);
+      trades.push({id:id++,t:t.s,side:t.a,d:t.d,q:matched,px:isNaN(t.px)?0:t.px,cost:entryPx/matched,fee:t.fee,pnl:realized,setup:t.a,fills,note:"",partial:dq!==0&&closer}); }
+  }
+  const held={}; Object.entries(lots).forEach(([s,L])=>{ const q=L.reduce((a,l)=>a+l.q,0); if(q) held[s]=q; });
+  return {trades:trades.reverse(),flows,fees,income,unmatched,held,first:tx[0]&&tx[0].d,last:tx.length&&tx[tx.length-1].d};
+}
+
+/* ================= sample data ================= */
+function sampleState(){
+  const positions = [
+    {t:"NVDA",n:"NVIDIA",grp:"Technology",q:900,cost:118.40,px:186.20,prev:182.90},
+    {t:"MSFT",n:"Microsoft",grp:"Technology",q:420,cost:402.10,px:512.30,prev:515.80},
+    {t:"AAPL",n:"Apple",grp:"Technology",q:600,cost:189.50,px:241.70,prev:240.10},
+    {t:"AVGO",n:"Broadcom",grp:"Technology",q:300,cost:168.00,px:342.50,prev:335.20},
+    {t:"GOOGL",n:"Alphabet",grp:"Communication",q:650,cost:152.80,px:198.40,prev:199.90},
+    {t:"AMZN",n:"Amazon",grp:"Consumer",q:700,cost:178.20,px:224.60,prev:221.30},
+    {t:"COST",n:"Costco",grp:"Consumer",q:90,cost:870.00,px:948.20,prev:951.00},
+    {t:"JPM",n:"JPMorgan Chase",grp:"Financials",q:450,cost:205.60,px:288.10,prev:286.40},
+    {t:"XOM",n:"Exxon Mobil",grp:"Energy",q:500,cost:112.30,px:108.90,prev:110.20},
+    {t:"TLT",n:"20+ Yr Treasury ETF",grp:"Bonds",q:800,cost:92.10,px:88.40,prev:88.10}
+  ].map(p=>({...p,mv:p.q*p.px,day:p.q*(p.px-p.prev),costTotal:p.q*p.cost}));
+  const trades = [
+    {id:1,t:"NVDA",d:"2026-11-20",q:150,px:185.40,cost:142.10,fee:0.66,setup:"Trim into strength",fills:[["2026-09-03","Buy",150,142.10],["2026-11-20","Sell",150,185.40]],note:"Trimmed ahead of the weekend. Position still 900 sh. Plan to re-add near the 50-day."},
+    {id:2,t:"TSLA",d:"2026-11-19",q:80,px:338.20,cost:352.75,fee:0.66,setup:"Earnings fade",fills:[["2026-11-12","Buy",80,352.75],["2026-11-19","Sell",80,338.20]],note:"Stopped out. Entered too early; didn't wait for the gap to fill."},
+    {id:3,t:"AMD",d:"2026-11-18",q:200,px:164.90,cost:151.30,fee:0.66,setup:"Breakout",fills:[["2026-11-04","Buy",120,150.80],["2026-11-06","Buy",80,152.05],["2026-11-18","Sell",200,164.90]],note:"Added on the retest. Clean trade, sized right."},
+    {id:4,t:"META",d:"2026-11-17",q:40,px:612.40,cost:598.00,fee:0.66,setup:"Swing",fills:[["2026-10-28","Buy",40,598.00],["2026-11-17","Sell",40,612.40]],note:""},
+    {id:5,t:"SPY 11/21 590P",d:"2026-11-13",q:10,px:2.15,cost:3.40,fee:6.50,mult:100,setup:"Hedge",fills:[["2026-11-06","Buy to open",10,3.40],["2026-11-13","Sell to close",10,2.15]],note:"CPI hedge. Didn't need it. Cost of insurance."},
+    {id:6,t:"XOM",d:"2026-11-10",q:200,px:111.85,cost:114.20,fee:0.66,setup:"Rebalance",fills:[["2026-06-22","Buy",200,114.20],["2026-11-10","Sell",200,111.85]],note:"Cutting energy weight. Tax-loss candidate, watch the 30-day wash window before rebuying."},
+    {id:7,t:"JPM",d:"2026-11-04",q:100,px:283.10,cost:241.60,fee:0.66,setup:"Trim",fills:[["2026-04-15","Buy",100,241.60],["2026-11-04","Sell",100,283.10]],note:""},
+    {id:8,t:"PLTR",d:"2026-10-29",q:300,px:71.20,cost:64.85,fee:0.66,setup:"Breakout",fills:[["2026-10-15","Buy",300,64.85],["2026-10-29","Sell",300,71.20]],note:"Took profits before earnings. On watchlist to re-enter."},
+    {id:9,t:"LLY",d:"2026-10-08",q:30,px:788.00,cost:812.50,fee:0.66,setup:"Swing",fills:[["2026-09-24","Buy",30,812.50],["2026-10-08","Sell",30,788.00]],note:"Thesis intact but chart broke. Respect the stop."},
+    {id:10,t:"AAPL",d:"2026-08-12",q:150,px:226.30,cost:194.10,fee:0.66,setup:"Trim",fills:[["2026-02-10","Buy",150,194.10],["2026-08-12","Sell",150,226.30]],note:""}
+  ];
+  trades.forEach(t=>{ t.pnl=(t.px-t.cost)*t.q*(t.mult||1)-t.fee; });
+  const cash=96420.18, start=1102500, flows=[{d:"2026-03-02",a:50000,k:"Deposit"},{d:"2026-08-14",a:-20000,k:"Withdrawal"}];
+  const total=positions.reduce((s,p)=>s+p.mv,0)+cash;
+  const monthly=[8420,-3150,12880,4210,-6740,9630,15220,-2480,7310,11050,4925,0];
+  const r0=rng(7), weekly=[]; for(let i=11;i>=0;i--){ const mo=mondayOf(new Date(2026,10,20-i*7)); weekly.push({l:md(mo),v:Math.round((r0()-0.4)*7000)}); }
+  weekly[11].v=Math.round(trades.filter(t=>t.d>="2026-11-16").reduce((s,t)=>s+t.pnl,0));
+  const series=[]; { const r=rng(42); let d=new Date(2026,0,2); const pts=[];
+    while(d<=new Date(2026,10,20)){ if(d.getDay()%6) pts.push(new Date(d)); d.setDate(d.getDate()+1); }
+    let v=start, b=start; const raw=[];
+    pts.forEach(p=>{ const f=flows.find(x=>iso(p)===x.d); if(f) v+=f.a; v*=1+(r()-0.47)*0.016; b*=1+(r()-0.475)*0.011; raw.push({d:p,v,b}); });
+    const scale=total-raw[raw.length-1].v, bf=start*1.142/raw[raw.length-1].b;
+    raw.forEach((x,i)=>{ const k=i/(raw.length-1); x.v+=scale*k; x.b*=Math.pow(bf,k); series.push(x); }); }
+  return {src:"sample",asOf:"6:42 AM CT",account:"···4821",positions,cash,total,trades,flows,monthly,weekly,series,start,year:2026,
+    last:"2026-11-20",fees:null,income:null,grpLabel:"sector",recon:[],
+    flags:{COST:"Earnings Dec 3"}};
+}
+
+/* ================= real state from files ================= */
+function realState(files, startVal){
+  const S={src:"schwab",positions:[],cash:0,total:NaN,trades:[],flows:[],monthly:Array(12).fill(0),weekly:[],series:null,start:startVal||null,
+    grpLabel:"security type",recon:[],flags:{},asOf:"",account:"",fees:0,income:0};
+  let P=null, T=null;
+  if(files.pos){ P=parsePositions(files.pos); if(P){ Object.assign(S,{positions:P.positions,cash:P.cash,asOf:P.asOf,account:P.account}); } }
+  if(files.tx){ const tx=parseTransactions(files.tx); if(tx) T=buildFromTx(tx); }
+  const inv=S.positions.reduce((s,p)=>s+p.mv,0);
+  S.total = inv + S.cash;
+  if(T){
+    S.trades=T.trades; S.fees=T.fees; S.income=T.income; S.last=T.last||iso(TODAY);
+    S.year=parse(S.last).getFullYear();
+    S.flows=T.flows.filter(f=>f.d.startsWith(S.year));
+    T.trades.filter(t=>t.d.startsWith(S.year)).forEach(t=>{ S.monthly[parse(t.d).getMonth()]+=t.pnl; });
+    const lastMon=mondayOf(parse(S.last));
+    for(let i=11;i>=0;i--){ const a=new Date(lastMon); a.setDate(a.getDate()-i*7); const b=new Date(a); b.setDate(b.getDate()+7);
+      S.weekly.push({l:md(a),v:T.trades.filter(t=>{ const d=parse(t.d); return d>=a&&d<b; }).reduce((s,t)=>s+t.pnl,0)}); }
+    // cumulative realized line for the chart until daily history comes from the API
+    let c=0; const yt=T.trades.filter(t=>t.d.startsWith(S.year)).slice().reverse();
+    S.cum=[{d:new Date(S.year,0,1),v:0}].concat(yt.map(t=>{ c+=t.pnl; return {d:parse(t.d),v:c}; }));
+  } else { S.year=TODAY.getFullYear(); S.last=iso(TODAY); }
+  // reconciliation checks
+  const R=S.recon;
+  if(P){
+    if(!isNaN(P.total)){ const diff=S.total-P.total; R.push(Math.abs(diff)<1?["ok",`Positions + cash = ${fmt$(S.total,2)}, matches Schwab's account total.`]:["bad",`Positions + cash = ${fmt$(S.total,2)}, but Schwab's account total is ${fmt$(P.total,2)} (off by ${fmt$(diff,2)}).`]); }
+    else R.push(["warn","The positions file has no Account Total row, so the total couldn't be checked. Compare it to the Schwab balance by eye."]);
+    const noCost=S.positions.filter(p=>isNaN(p.costTotal)).map(p=>p.t);
+    if(noCost.length) R.push(["warn",`No cost basis for ${noCost.join(", ")}. Unrealized P&L leaves them out.`]);
+  } else R.push(["warn","No positions file loaded. Account value, cash and holdings stay empty."]);
+  if(T){
+    const yStart=`${S.year}-01-01`;
+    R.push(T.first<=yStart?["ok",`Transaction history starts ${md(parse(T.first))}, ${parse(T.first).getFullYear()}: covers all of ${S.year}.`]:["info",`First transaction in the file is ${md(parse(T.first))}, ${parse(T.first).getFullYear()}. Shares bought before that can't be matched to later sales.`]);
+    if(T.unmatched.length){ const syms=[...new Set(T.unmatched.map(u=>u.s))]; R.push(["warn",`${T.unmatched.length} sale${T.unmatched.length>1?"s":""} had no matching purchase in the file (${syms.slice(0,6).join(", ")}${syms.length>6?"…":""}). Their gain is left out. Export an earlier start date or use Schwab's Realized Gain/Loss report.`]); }
+    else R.push(["ok","Every sale matched a purchase in the file (first-in, first-out)."]);
+    if(P){ const off=S.positions.filter(p=>p.grp!=="Options" && Math.abs((T.held[p.t]||0)-p.q)>1e-6).map(p=>p.t);
+      R.push(off.length?["warn",`Share counts from transactions differ from positions for ${off.slice(0,8).join(", ")}${off.length>8?"…":""}. Usually means those were bought before the history starts, or a split or transfer.`]:["ok","Share counts rebuilt from transactions match every position."]); }
+    const ytdR=S.monthly.reduce((a,b)=>a+b,0);
+    R.push(["info",`Compare YTD realized ${fmtS$(ytdR,2)} with Schwab's Realized Gain/Loss page. Schwab uses its own lot method and wash-sale adjustments, so small gaps are normal.`]);
+  } else R.push(["warn","No transactions file loaded. P&L by period and the trade journal stay empty."]);
+  if(!S.start) R.push(["warn","Enter the Jan 1 account value from the December statement to calculate the year's return."]);
+  return S;
+}
+
+/* ================= state ================= */
+let files = store.get("cos-files",{});
+let startInput = store.get("cos-start","");
+let S;
+function rebuild(){ S = (files.pos||files.tx) ? realState(files, num(startInput)||null) : sampleState(); render(); }
+
+/* ================= charts ================= */
+function niceTicks(min,max,n){ const span=(max-min)||1, step0=span/n, mag=Math.pow(10,Math.floor(Math.log10(step0))); const step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=step0); const out=[]; for(let v=Math.ceil(min/step)*step; v<=max+1e-9; v+=step) out.push(+v.toFixed(6)); return out; }
+const fmtAxis = t => { const a=Math.abs(t); return (t<0?"−":"")+(a>=1e6?"$"+(a/1e6).toFixed(2)+"M":a>=1e3?"$"+(a/1e3).toFixed(0)+"k":"$"+a.toFixed(0)); };
+function lineChart(el, data, opt){
+  const W=720,H=240,m={l:62,r:14,t:12,b:24}, bench=opt.bench;
+  const vals=data.flatMap(d=>bench?[d.v,d.b]:[d.v]);
+  let lo=Math.min(...vals), hi=Math.max(...vals); const pad=((hi-lo)||Math.abs(hi)||1)*0.08; lo-=pad; hi+=pad;
+  const ticks=niceTicks(lo,hi,4); lo=Math.min(lo,ticks[0]); hi=Math.max(hi,ticks[ticks.length-1]);
+  const t0=+data[0].d, t1=+data[data.length-1].d, X=i=>m.l+(W-m.l-m.r)*((+data[i].d-t0)/((t1-t0)||1)), Y=v=>m.t+(H-m.t-m.b)*(1-(v-lo)/(hi-lo));
+  const path=k=>data.map((d,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(d[k]).toFixed(1)).join("");
+  const base=Math.max(lo,Math.min(hi,opt.zero?0:lo));
+  const area=path("v")+`L${X(data.length-1)} ${Y(base)}L${X(0)} ${Y(base)}Z`;
+  const xt=[]; let lastM=-1; data.forEach((d,i)=>{ if(d.d.getMonth()!==lastM){ lastM=d.d.getMonth(); xt.push([i,MON[lastM]]);} });
+  const step=Math.ceil(xt.length/8); const xts=xt.filter((_,i)=>i%step===0);
+  const last=data[data.length-1];
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--s1)" stop-opacity=".18"/><stop offset="1" stop-color="var(--s1)" stop-opacity="0"/></linearGradient></defs>
+    <g class="grid">${ticks.map(t=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(t)}" y2="${Y(t)}"/>`).join("")}</g>
+    ${opt.zero?`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1"/>`:""}
+    <g class="axis">${ticks.map(t=>`<text x="${m.l-8}" y="${Y(t)+3.5}" text-anchor="end">${fmtAxis(t)}</text>`).join("")}
+      ${xts.map(([i,l])=>`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${l}</text>`).join("")}</g>
+    <path d="${area}" fill="url(#ag)"/>
+    ${bench?`<path d="${path("b")}" fill="none" stroke="var(--bench)" stroke-width="1.5" stroke-dasharray="4 3"/>`:""}
+    <path d="${path("v")}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${X(data.length-1)}" cy="${Y(last.v)}" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/>
+    <line class="xh" y1="${m.t}" y2="${H-m.b}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+    <circle class="xd" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
+    <rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent" class="hit"/>
+  </svg><div class="tip"></div>`;
+  const svg=el.querySelector("svg"), tip=el.querySelector(".tip"), xh=el.querySelector(".xh"), xd=el.querySelector(".xd");
+  const move=e=>{ const r=svg.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width*W; let i=0, best=1e9; data.forEach((_,k)=>{ const dd=Math.abs(X(k)-px); if(dd<best){ best=dd; i=k; } }); const d=data[i];
+    xh.setAttribute("x1",X(i)); xh.setAttribute("x2",X(i)); xh.setAttribute("opacity",".5"); xd.setAttribute("cx",X(i)); xd.setAttribute("cy",Y(d.v)); xd.setAttribute("opacity","1");
+    tip.innerHTML=`${md(d.d)} · <b>${opt.zero?fmtS$(d.v):fmt$(d.v)}</b>${bench?` <span style="opacity:.7">S&amp;P ${fmt$(d.b)}</span>`:""}`; tip.style.left=(X(i)/W*r.width)+"px"; tip.style.top=(Y(d.v)/H*r.height)+"px"; tip.classList.add("on"); };
+  const out=()=>{ tip.classList.remove("on"); xh.setAttribute("opacity","0"); xd.setAttribute("opacity","0"); };
+  const hit=el.querySelector(".hit"); hit.addEventListener("pointermove",move); hit.addEventListener("pointerleave",out);
+}
+function barChart(el,data){
+  const W=720,H=220,m={l:62,r:10,t:14,b:24};
+  const vals=data.map(d=>d.v); let lo=Math.min(0,...vals), hi=Math.max(0,...vals); if(lo===hi) hi=1000;
+  const ticks=niceTicks(lo,hi,4); lo=Math.min(lo,ticks[0]); hi=Math.max(hi,ticks[ticks.length-1]);
+  const Y=v=>m.t+(H-m.t-m.b)*(1-(v-lo)/(hi-lo)); const bw=(W-m.l-m.r)/data.length; const w=Math.min(34,bw*0.62);
+  const bars=data.map((d,i)=>{ if(!d.v) return `<rect x="${m.l+bw*i}" y="${m.t}" width="${bw}" height="${H-m.t-m.b}" fill="transparent" data-i="${i}"/>`;
+    const x=m.l+bw*i+(bw-w)/2, y0=Y(0), y1=Y(d.v), h=Math.max(1,Math.abs(y1-y0)), r=Math.min(4,h/2), up=d.v>=0, top=up?y1:y0, fill=up?"var(--gain)":"var(--loss)";
+    const p = up ? `M${x} ${y0}V${top+r}Q${x} ${top} ${x+r} ${top}H${x+w-r}Q${x+w} ${top} ${x+w} ${top+r}V${y0}Z`
+                 : `M${x} ${y0}V${y0+h-r}Q${x} ${y0+h} ${x+r} ${y0+h}H${x+w-r}Q${x+w} ${y0+h} ${x+w} ${y0+h-r}V${y0}Z`;
+    return `<path d="${p}" fill="${fill}"/><rect x="${m.l+bw*i}" y="${m.t}" width="${bw}" height="${H-m.t-m.b}" fill="transparent" data-i="${i}"/>`; }).join("");
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Realized P&L by period">
+    <g class="grid">${ticks.map(t=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(t)}" y2="${Y(t)}"/>`).join("")}</g>
+    <line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1"/>
+    <g class="axis">${ticks.map(t=>`<text x="${m.l-8}" y="${Y(t)+3.5}" text-anchor="end">${fmtAxis(t)}</text>`).join("")}
+    ${data.map((d,i)=>`<text x="${m.l+bw*i+bw/2}" y="${H-6}" text-anchor="middle">${d.l}</text>`).join("")}</g>${bars}</svg><div class="tip"></div>`;
+  const tip=el.querySelector(".tip"), svg=el.querySelector("svg");
+  svg.querySelectorAll("rect[data-i]").forEach(r=>{ r.addEventListener("pointerenter",()=>{ const i=+r.dataset.i, d=data[i], b=svg.getBoundingClientRect();
+    tip.innerHTML=`${d.l} · <b>${fmtS$(d.v)}</b>`; tip.style.left=((m.l+bw*i+bw/2)/W*b.width)+"px"; tip.style.top=(Y(Math.max(0,d.v))/H*b.height)+"px"; tip.classList.add("on"); });
+    r.addEventListener("pointerleave",()=>tip.classList.remove("on")); });
+}
+
+/* ================= derived numbers ================= */
+function derive(){
+  const inv=S.positions.reduce((s,p)=>s+p.mv,0);
+  const withCost=S.positions.filter(p=>!isNaN(p.costTotal));
+  const unreal=withCost.reduce((s,p)=>s+p.mv-p.costTotal,0);
+  const day=S.positions.reduce((s,p)=>s+(p.day||0),0);
+  const realized=S.monthly.reduce((a,b)=>a+b,0);
+  const netFlows=S.flows.reduce((s,f)=>s+f.a,0);
+  let gain=null, ret=null;
+  if(S.start){ const y0=new Date(S.year,0,1), end=parse(S.last), days=Math.max(1,(end-y0)/864e5);
+    const w=S.flows.reduce((s,f)=>s+f.a*Math.max(0,(end-parse(f.d))/864e5)/days,0);
+    gain=S.total-S.start-netFlows; ret=gain/(S.start+w)*100; }
+  return {inv,unreal,day,realized,netFlows,gain,ret};
+}
+
+/* ================= render ================= */
+let perfR = store.get("cos-perf","all"), pnlM="month", jp="month";
+function stat(k,v,d){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`; }
+const SEC_COLOR=["--s1","--s2","--s3","--s4","--s5","--s6","--s7"];
+
+function render(){
+  const D=derive(), real=S.src!=="sample";
+  // source chip and data bar
+  $("#srcChip").className = real?"chip ok":"chip"; $("#srcChip").textContent = real?"Schwab export":"Sample data";
+  $("#syncTime").textContent = real?(S.asOf||"export loaded"):S.asOf;
+  $("#srcLabel").textContent = real?"Showing Colby's Schwab export":"Showing sample data";
+  $("#srcMeta").textContent = real?[files.posName,files.txName].filter(Boolean).join(" · "):"Load his Schwab files to replace the portfolio, P&L and journal numbers.";
+  $("#resetData").hidden=!real;
+  $("#recon").innerHTML = real? S.recon.map(r=>`<li class="rc ${r[0]}"><span class="rci">${{ok:"✓",warn:"!",bad:"✕",info:"i"}[r[0]]}</span><span>${r[1]}</span></li>`).join("") : "";
+  $("#recon").hidden=!real;
+  $("#acctSub").textContent = `Schwab ${S.account?"account "+S.account+" · ":""}source of truth for totals`;
+
+  // Q1
+  $("#qValue").textContent = fmt$(S.total);
+  $("#qValueRow").innerHTML = `<span>Last session <b class="${cls(D.day)}">${fmtS$(D.day)}</b> <b class="${cls(D.day)}">${S.total-D.day?pct(D.day/(S.total-D.day)*100):""}</b></span><span>Cash <b>${fmt$(S.cash)}</b></span>`;
+  const spx = S.series? (S.series[S.series.length-1].b/S.start-1)*100 : null;
+  $("#qYtdRow").innerHTML = `<span>YTD return <b class="${cls(D.ret)}">${D.ret==null?"add Jan 1 value":pct(D.ret,1)}</b></span>${spx!=null?`<span>vs S&amp;P <b class="${cls(spx)}">${pct(spx,1)}</b></span>`:""}<span>Realized <b class="${cls(D.realized)}">${fmtS$(D.realized)}</b></span>`;
+
+  // overnight book line from positions
+  const movers=S.positions.filter(p=>p.mv-p.day).map(p=>({t:p.t,c:p.day/(p.mv-p.day)*100})).sort((a,b)=>b.c-a.c);
+  const book = movers.length? `${movers.slice(0,2).map(m=>`${esc(m.t)} ${pct(m.c,1)}`).join(", ")} led; ${esc(movers[movers.length-1].t)} ${pct(movers[movers.length-1].c,1)}` : "No positions loaded";
+  const overnight=[["ASIA","Nikkei −0.8% on a firmer yen; Hang Seng +0.4% led by tech"],["EUROPE","Stoxx 600 flat Friday close; Bunds rallied on soft PMIs"],["FUTURES","Closed until Sun evening. Fri: S&P +0.6%, Nasdaq +0.9%"],["RATES","10-yr 4.18% (−4 bp on the week); dollar index 103.9"],["BOOK",book]];
+  $("#qOvernight").innerHTML = overnight.map(o=>`<li><span class="tag">${o[0]}</span><span>${o[1]}</span></li>`).join("");
+
+  // portfolio stats
+  const nc=S.positions.filter(p=>isNaN(p.costTotal)).length;
+  $("#pStats").innerHTML = stat("Account value",fmt$(S.total),real?"as of "+(S.asOf||"export"):"as of 6:42 AM CT sync")+
+    stat("Cash",fmt$(S.cash),S.total?(S.cash/S.total*100).toFixed(1)+"% of account":"")+
+    stat("Open positions",S.positions.length,fmt$(D.inv)+" invested")+
+    stat("Unrealized P&L",`<span class="${cls(D.unreal)}">${fmtS$(D.unreal)}</span>`,nc?`${nc} without cost basis`:"on cost basis");
+  drawPerf();
+
+  // allocation
+  const groups=[...new Set(S.positions.map(p=>p.grp))]; const gv=groups.map(g=>S.positions.filter(p=>p.grp===g).reduce((a,p)=>a+p.mv,0));
+  const order=groups.map((g,i)=>[g,gv[i]]).sort((a,b)=>b[1]-a[1]).slice(0,6).concat([["Cash",S.cash]]);
+  $("#allocHead").textContent = `Allocation by ${S.grpLabel}`;
+  $("#allocBar").innerHTML = order.map(([g,v],i)=>`<div style="width:${S.total?v/S.total*100:0}%;background:var(${SEC_COLOR[i]})" title="${esc(g)} ${(v/S.total*100).toFixed(1)}%"></div>`).join("");
+  $("#allocLegend").innerHTML = order.map(([g,v],i)=>`<span><i style="background:var(${SEC_COLOR[i]})"></i>${esc(g)} <b class="num">${S.total?(v/S.total*100).toFixed(1):"0.0"}%</b></span>`).join("");
+
+  // positions
+  $("#posTable").innerHTML = `<thead><tr><th>Symbol</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Day</th><th class="r">Market value</th><th class="r">Unrealized</th><th class="r">Weight</th></tr></thead><tbody>`+
+    (S.positions.length? S.positions.slice().sort((a,b)=>b.mv-a.mv).map(p=>{ const u=p.mv-p.costTotal, dc=(p.mv-p.day)?p.day/(p.mv-p.day)*100:0, fl=S.flags[p.t];
+    return `<tr><td><span class="num" style="font-weight:600">${esc(p.t)}</span> <span class="muted" style="font-size:12px">${esc(p.n.slice(0,22))}</span>${fl?`<span class="flag">${fl}</span>`:""}</td><td class="r num">${p.q.toLocaleString()}</td><td class="r num">${isNaN(p.px)?"—":p.px.toFixed(2)}</td><td class="r num ${cls(dc)}">${pct(dc)}</td><td class="r num">${fmt$(p.mv)}</td><td class="r num ${cls(u)}">${isNaN(u)?"—":fmtS$(u)+`<br><span style="font-size:11px">${pct(u/p.costTotal*100,1)}</span>`}</td><td class="r num">${(p.mv/S.total*100).toFixed(1)}%</td></tr>`; }).join("") : `<tr><td colspan="7" class="muted">No positions file loaded.</td></tr>`)+
+    `<tr><td>Cash &amp; sweep</td><td></td><td></td><td></td><td class="r num">${fmt$(S.cash)}</td><td></td><td class="r num">${S.total?(S.cash/S.total*100).toFixed(1):"0.0"}%</td></tr></tbody>`;
+
+  // P&L
+  $("#pnlStats").innerHTML = stat("YTD total P&L",D.gain==null?`<span class="muted">—</span>`:`<span class="${cls(D.gain)}">${fmtS$(D.gain)}</span>`,D.gain==null?"needs Jan 1 value":"market gain, excludes deposits")+
+    stat("Realized",`<span class="${cls(D.realized)}">${fmtS$(D.realized)}</span>`,"closed trades, after fees")+
+    stat("Unrealized",`<span class="${cls(D.unreal)}">${fmtS$(D.unreal)}</span>`,"open positions vs cost")+
+    stat("Portfolio return",D.ret==null?`<span class="muted">—</span>`:`<span class="${cls(D.ret)}">${pct(D.ret,1)}</span>`,"modified Dietz, flow-adjusted");
+  $("#flowNote").innerHTML = (S.start?`Starting value ${fmt$(S.start)} on Jan 1. `:`Jan 1 value not entered yet. `)+
+    `Net deposits ${fmtS$(D.netFlows)}${S.flows.length?` (${S.flows.slice(0,4).map(f=>`${f.k.toLowerCase()} ${fmt$(Math.abs(f.a))} ${md(parse(f.d))}`).join(", ")}${S.flows.length>4?", …":""})`:""}. Deposits are removed from gain so new money doesn't look like profit.`+
+    (S.income!=null?` Dividends and interest ${fmtS$(S.income,2)}; fees ${fmt$(S.fees,2)}.`:"");
+  drawPnl();
+
+  drawJournal(); drawAttn();
+  $("#dateLine").textContent = "Saturday, November 21, 2026 · markets closed for the weekend";
+  $("#session").innerHTML = "Next session <b>Mon Nov 23 · 8:30 AM CT</b><br>Futures reopen Sun 5:00 PM CT";
+}
+
+function drawPerf(){
+  const real=S.src!=="sample";
+  if(!real){ const d = perfR==="all"?S.series:S.series.slice(-Number(perfR)); lineChart($("#perfChart"),d,{bench:true,label:"Account value over time"});
+    $("#perfLegend").innerHTML=`<span><i class="line" style="background:var(--s1)"></i>Account value</span><span><i class="dash"></i>S&amp;P 500, same start value</span>`; $("#perfRange").hidden=false; }
+  else { $("#perfRange").hidden=true;
+    if(S.cum && S.cum.length>1){ lineChart($("#perfChart"),S.cum,{zero:true,label:"Cumulative realized P&L"}); $("#perfLegend").innerHTML=`<span><i class="line" style="background:var(--s1)"></i>Cumulative realized P&amp;L, ${S.year}</span><span class="muted">Daily account value arrives with the Schwab API sync.</span>`; }
+    else { $("#perfChart").innerHTML=`<p class="meta" style="padding:30px 0;text-align:center">Load a transactions file to chart realized P&amp;L. Daily account value arrives with the Schwab API sync.</p>`; $("#perfLegend").innerHTML=""; } }
+  document.querySelectorAll("#perfRange button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.r===perfR)));
+}
+$("#perfRange").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; perfR=b.dataset.r; store.set("cos-perf",perfR); drawPerf(); });
+
+function drawPnl(){ const last=parse(S.last).getMonth(); barChart($("#pnlChart"), pnlM==="month"? S.monthly.slice(0,last+1).map((v,i)=>({l:MON[i],v})) : S.weekly);
+  document.querySelectorAll("#pnlMode button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===pnlM))); }
+$("#pnlMode").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; pnlM=b.dataset.m; drawPnl(); });
+
+/* ---------- brief (example content) ---------- */
+const watch = ["PLTR","LLY","TSM"];
+const regions = [
+  ["Asia · overnight",[["Nikkei 225",-0.8],["Hang Seng",0.4],["Shanghai",-0.2],["Kospi",0.6]]],
+  ["Europe · Fri close",[["Stoxx 600",0.0],["DAX",0.3],["FTSE 100",-0.4],["CAC 40",0.1]]],
+  ["U.S. · Fri close",[["S&P 500",0.6],["Nasdaq 100",0.9],["Russell 2000",1.2],["VIX 14.8",-3.1]]]
+];
+$("#regions").innerHTML = regions.map(r=>`<div class="region"><h3>${r[0]}</h3>${r[1].map(x=>`<div class="idx"><span>${x[0]}</span><span class="num ${cls(x[1])}">${pct(x[1],1)}</span></div>`).join("")}</div>`).join("");
+$("#drivers").innerHTML = [
+  "Fed speakers dominate a holiday-shortened week; markets price about a 60% chance of a December cut.",
+  "Thanksgiving: markets closed Thursday, early 12:00 PM CT close Friday. Expect thin volume.",
+  "Core PCE (Wed) is the last big inflation read before the December FOMC.",
+  "AI capex trade extended after strong semiconductor guidance late last week."
+].map(x=>`<li>${x}</li>`).join("");
+const newsHold = [
+  ["NVDA","Supplier commentary points to firm data-center demand into Q1","Reuters","https://www.reuters.com/markets/"],
+  ["COST","Reports Dec 3 after close; November same-store sales due this week","Barron's","https://www.barrons.com/"],
+  ["XOM","Crude slips as OPEC+ signals steady output into January","Bloomberg","https://www.bloomberg.com/markets"],
+  ["PLTR","Watchlist · new federal contract award reported","CNBC","https://www.cnbc.com/markets/"]
+];
+$("#newsHold").innerHTML = newsHold.map(n=>`<li><span class="htag${watch.includes(n[0])?" w":""}">${n[0]}</span><div class="grow"><a href="${n[3]}" target="_blank" rel="noopener">${esc(n[1])}</a><div class="src">${n[2]}${watch.includes(n[0])?" · watchlist":" · holding"}</div></div></li>`).join("");
+const blogs = [
+  ["The Daily Shot","Chart pack: breadth improving outside mega-cap tech","https://dailyshotbrief.com/"],
+  ["Stratechery","Why hyperscaler capex keeps surprising to the upside","https://stratechery.com/"],
+  ["Calculated Risk","Existing home sales preview","https://www.calculatedriskblog.com/"]
+];
+$("#newsBlogs").innerHTML = blogs.map(n=>`<li><div class="grow"><a href="${n[2]}" target="_blank" rel="noopener">${esc(n[1])}</a><div class="src">${n[0]}</div></div></li>`).join("");
+const events = [
+  {d:"2026-11-23",tm:"8:30 AM",l:"Chicago Fed National Activity",k:"econ"},
+  {d:"2026-11-24",tm:"9:00 AM",l:"Case-Shiller home prices; Consumer confidence",k:"econ"},
+  {d:"2026-11-25",tm:"7:30 AM",l:"Core PCE, GDP 2nd est., jobless claims",k:"econ",hi:true},
+  {d:"2026-11-25",tm:"1:00 PM",l:"FOMC minutes",k:"econ",hi:true},
+  {d:"2026-11-26",tm:"All day",l:"Thanksgiving · U.S. markets closed",k:"hol"},
+  {d:"2026-11-27",tm:"12:00 PM",l:"Early close",k:"hol"},
+  {d:"2026-12-03",tm:"After close",l:"COST earnings",sym:"COST",k:"earn",hi:true},
+  {d:"2026-12-04",tm:"7:30 AM",l:"November jobs report",k:"econ",hi:true},
+  {d:"2026-12-11",tm:"After close",l:"AVGO earnings",sym:"AVGO",k:"earn",hi:true},
+  {d:"2026-12-16",tm:"1:00 PM",l:"FOMC decision",k:"econ",hi:true}
+];
+$("#calList").innerHTML = events.map(e=>{ const d=parse(e.d); return `<li><span class="when">${DOW[d.getDay()]} ${md(d)}<br>${e.tm}</span><div class="grow"><div class="ttl" style="font-weight:${e.hi?600:500}">${e.l}</div></div>${e.k==="earn"?'<span class="chip info">Earnings</span>':e.k==="hol"?'<span class="chip ok">Market</span>':""}</li>`; }).join("");
+
+/* ---------- gmail (example) ---------- */
+const mail = [
+  ["thinkorswim Alerts","NVDA crossed above 185.00","6:12 AM"],
+  ["Schwab","Your November trade confirmations are ready","Fri"],
+  ["Barron's","The week ahead: PCE and a holiday tape","Fri"],
+  ["The Daily Shot","Daily Shot Brief, November 20","Fri"],
+  ["Schwab","Action needed: re-authorize your API connection by Nov 24","Thu"]
+];
+$("#mailCount").textContent = mail.length+" unread";
+$("#mailList").innerHTML = mail.map(m=>`<li><span class="dot"></span><div class="grow"><div class="from">${m[0]}<span>${m[2]}</span></div><div class="subj"><a href="https://mail.google.com/mail/u/0/#inbox" target="_blank" rel="noopener">${esc(m[1])}</a></div></div></li>`).join("");
+
+/* ---------- trips ---------- */
+const DEFAULT_TRIPS = [
+  {id:"t1",n:"Cabo · family",s:"2026-03-14",e:"2026-03-21"},
+  {id:"t2",n:"Omaha · Berkshire meeting",s:"2026-05-01",e:"2026-05-03"},
+  {id:"t3",n:"Napa",s:"2026-06-18",e:"2026-06-22"},
+  {id:"t4",n:"Jackson Hole",s:"2026-08-20",e:"2026-08-24"},
+  {id:"t5",n:"New York · client dinners",s:"2026-10-13",e:"2026-10-15"},
+  {id:"t6",n:"Dallas · Thanksgiving",s:"2026-11-25",e:"2026-11-29"},
+  {id:"t7",n:"Vail · ski week",s:"2026-12-14",e:"2026-12-19"},
+  {id:"t8",n:"London",s:"2027-02-08",e:"2027-02-14"},
+  {id:"t9",n:"Augusta · the Masters",s:"2027-04-08",e:"2027-04-11"}
+];
+let trips = store.get("cos-trips",DEFAULT_TRIPS);
+const keyDates = new Set(events.filter(e=>e.hi).map(e=>e.d).concat(["2026-01-28","2026-03-18","2026-04-29","2026-06-17","2026-07-29","2026-09-16","2026-10-28","2026-12-16","2027-01-27","2027-03-17"]));
+let yr = store.get("cos-yr",2026);
+function inTrip(ds){ return trips.find(t=>ds>=t.s && ds<=t.e); }
+function tripConflicts(t){ const out=[]; for(let d=parse(t.s); d<=parse(t.e); d.setDate(d.getDate()+1)){ if(keyDates.has(iso(d))) out.push(iso(d)); } return out; }
+function drawYear(){
+  $("#yLbl").textContent = yr;
+  let h=""; for(let mo=0;mo<12;mo++){ const first=new Date(yr,mo,1), dim=new Date(yr,mo+1,0).getDate(); let tripDays=0; let cells="SMTWTFS".split("").map(c=>`<div class="dow">${c}</div>`).join("");
+    for(let i=0;i<first.getDay();i++) cells+="<div></div>";
+    for(let d=1;d<=dim;d++){ const dt=new Date(yr,mo,d), ds=iso(dt), t=inTrip(ds); if(t) tripDays++;
+      const c=[]; if(t) c.push("t"); if(t && keyDates.has(ds)) c.push("fl"); if(!t && keyDates.has(ds)) c.push("ev"); if(ds===iso(TODAY)) c.push("today"); if(!t && (dt.getDay()===0||dt.getDay()===6)) c.push("wk");
+      cells+=`<div class="${c.join(" ")}" ${t?`title="${esc(t.n)}"`:""}>${d}</div>`; }
+    h+=`<div class="month"><h4>${MON[mo]}${tripDays?`<span>${tripDays} day${tripDays>1?"s":""} away</span>`:""}</h4><div class="days">${cells}</div></div>`; }
+  $("#yearGrid").innerHTML=h;
+  const list = trips.filter(t=>t.s.startsWith(yr)||t.e.startsWith(yr)).sort((a,b)=>a.s<b.s?-1:1);
+  const upcoming = list.filter(x=>parse(x.s)>=TODAY)[0];
+  $("#tripList").innerHTML = list.length? list.map(t=>{ const s=parse(t.s), e=parse(t.e), past=e<TODAY, cf=tripConflicts(t);
+    return `<li style="${past?"opacity:.55":""}"><div class="grow"><div class="ttl">${esc(t.n)}</div><div class="meta">${md(s)} – ${md(e)} · ${Math.round((e-s)/864e5)+1} days${cf.length?` · <span style="color:var(--warn)">overlaps ${cf.map(d=>md(parse(d))).join(", ")}</span>`:""}</div></div>${t===upcoming?'<span class="chip trip">Next</span>':""}<button class="x" data-del="${t.id}" aria-label="Remove ${esc(t.n)}">×</button></li>`; }).join("") : `<li class="meta">No trips in ${yr} yet. Add one below.</li>`;
+}
+$("#yPrev").onclick=()=>{ yr--; store.set("cos-yr",yr); drawYear(); };
+$("#yNext").onclick=()=>{ yr++; store.set("cos-yr",yr); drawYear(); };
+$("#tripList").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(!b) return; trips=trips.filter(t=>t.id!==b.dataset.del); store.set("cos-trips",trips); drawYear(); drawAttn(); });
+$("#tripForm").addEventListener("submit",e=>{ e.preventDefault(); let s=$("#tripStart").value, en=$("#tripEnd").value; if(!s||!en) return; if(en<s) [s,en]=[en,s];
+  trips.push({id:"t"+Date.now(),n:$("#tripName").value.trim(),s,e:en}); store.set("cos-trips",trips); yr=Number(s.slice(0,4)); e.target.reset(); drawYear(); drawAttn(); });
+
+/* ---------- to-do ---------- */
+const DEFAULT_TODOS = [
+  {id:1,t:"Decide on COST before Dec 3 earnings: hold, trim, or hedge",p:"high",due:"2026-11-23",done:false},
+  {id:2,t:"Re-authorize Schwab API connection (expires Nov 24)",p:"high",due:"2026-11-23",done:false},
+  {id:3,t:"XOM tax-loss sale: no rebuy until Dec 11 (wash-sale window)",p:"med",due:"2026-12-11",done:false},
+  {id:4,t:"Set limit orders in thinkorswim before Dallas trip",p:"med",due:"2026-11-24",done:false},
+  {id:5,t:"Review Q4 estimated tax payment with CPA",p:"med",due:"2026-12-15",done:false},
+  {id:6,t:"Read Stratechery capex piece",p:"low",due:"",done:true}
+];
+let todos = store.get("cos-todos",DEFAULT_TODOS), tf="open";
+function drawTodos(){
+  const t0=iso(TODAY), next=iso(new Date(2026,10,23));
+  const rank={high:0,med:1,low:2};
+  let list=todos.slice().sort((a,b)=>(a.done-b.done)||(rank[a.p]-rank[b.p])||((a.due||"9")<(b.due||"9")?-1:1));
+  if(tf==="open") list=list.filter(x=>!x.done); if(tf==="today") list=list.filter(x=>!x.done && x.due && x.due<=next);
+  $("#todoList").innerHTML = list.length? list.map(x=>{ const od=x.due && x.due<t0 && !x.done;
+    return `<li class="${x.done?"done":""}"><input type="checkbox" id="td${x.id}" data-id="${x.id}" ${x.done?"checked":""}><label for="td${x.id}" class="grow"><div class="ttl">${esc(x.t)}</div>${x.due?`<div class="meta" style="${od?"color:var(--loss)":""}">Due ${md(parse(x.due))}${od?" · overdue":""}</div>`:""}</label><span class="pri ${x.p}">${x.p}</span><button class="x" data-del="${x.id}" aria-label="Delete task">×</button></li>`; }).join("") : `<li class="meta">Nothing here. Add a task above.</li>`;
+  $("#todoCount").textContent = todos.filter(x=>!x.done).length+" open";
+  document.querySelectorAll("#todoFilter button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.f===tf)));
+}
+$("#todoList").addEventListener("change",e=>{ const id=+e.target.dataset.id; const x=todos.find(t=>t.id===id); if(x){ x.done=e.target.checked; store.set("cos-todos",todos); drawTodos(); drawAttn(); } });
+$("#todoList").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(!b) return; todos=todos.filter(t=>t.id!==+b.dataset.del); store.set("cos-todos",todos); drawTodos(); drawAttn(); });
+$("#todoForm").addEventListener("submit",e=>{ e.preventDefault(); const t=$("#todoText").value.trim(); if(!t) return; todos.push({id:Date.now(),t,p:$("#todoPri").value,due:$("#todoDue").value,done:false}); store.set("cos-todos",todos); $("#todoText").value=""; $("#todoDue").value=""; drawTodos(); drawAttn(); });
+$("#todoFilter").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; tf=b.dataset.f; drawTodos(); });
+
+/* ---------- attention ---------- */
+function drawAttn(){
+  if(!S) return;
+  const items=[];
+  if(S.src!=="sample"){ const bad=S.recon.filter(r=>r[0]==="bad"||r[0]==="warn").length; if(bad) items.push(["hi",`${bad} reconciliation item${bad>1?"s":""} to check on the Schwab export`]); }
+  todos.filter(x=>!x.done && x.p==="high").forEach(x=>items.push(["hi",esc(x.t)]));
+  events.filter(e=>e.k==="earn" && parse(e.d)>=TODAY).forEach(e=>{ const p=S.positions.find(p=>p.t===e.sym); if(p) items.push(["md",`${e.sym} reports ${md(parse(e.d))} ${e.tm.toLowerCase()} · ${(p.mv/S.total*100).toFixed(1)}% of the account`]); });
+  items.push(["md","Wed Nov 25: Core PCE 7:30 AM CT, FOMC minutes 1:00 PM CT"]);
+  const nt=trips.filter(t=>parse(t.e)>=TODAY).sort((a,b)=>a.s<b.s?-1:1)[0];
+  if(nt){ const cf=tripConflicts(nt); const dd=Math.round((parse(nt.s)-TODAY)/864e5); items.push(["tr",`${esc(nt.n)} ${dd>0?`in ${dd} days`:"now"}${cf.length?` · overlaps ${cf.map(d=>md(parse(d))).join(", ")}`:""}`]); }
+  items.push(["", `${mail.length} unread from your senders, 1 price alert`]);
+  $("#qAttn").innerHTML = items.slice(0,5).map(i=>`<li class="${i[0]}">${i[1]}</li>`).join("");
+}
+
+/* ---------- journal ---------- */
+const savedNotes = store.get("cos-notes",{});
+const noteKey = t => S.src==="sample" ? "s"+t.id : `${t.t}|${t.d}|${t.q}`;
+function inPeriod(t){ const d=parse(t.d), end=parse(S.last);
+  if(jp==="day") return t.d===S.last;
+  if(jp==="week") return d>=mondayOf(end) && d<=end;
+  if(jp==="month") return d.getMonth()===end.getMonth() && d.getFullYear()===end.getFullYear();
+  return d.getFullYear()===end.getFullYear(); }
+function drawJournal(){
+  const list=S.trades.filter(inPeriod), net=list.reduce((s,t)=>s+t.pnl,0), fees=list.reduce((s,t)=>s+t.fee,0);
+  const best=list.slice().sort((a,b)=>b.pnl-a.pnl)[0], worst=list.slice().sort((a,b)=>a.pnl-b.pnl)[0];
+  const end=parse(S.last);
+  const label={day:`${DOW[end.getDay()]} ${md(end)}`,week:`Week of ${md(mondayOf(end))}`,month:`${MON[end.getMonth()]} ${end.getFullYear()}`,year:`${end.getFullYear()} to date`}[jp];
+  const short = s => esc(String(s).split(" ")[0]);
+  $("#jStats").innerHTML= stat("Closed trades",list.length,label)+stat("Net realized",`<span class="${cls(net)}">${fmtS$(net)}</span>`,"after fees")+stat("Fees",fmt$(fees,2),"commissions + reg fees")+
+    stat("Best / worst",best?`<span class="gain">${best.pnl>0?short(best.t):"—"}</span> / <span class="loss">${worst.pnl<0?short(worst.t):"—"}</span>`:"—",best?`${best.pnl>0?fmtS$(best.pnl):"no winners"} / ${worst.pnl<0?fmtS$(worst.pnl):"no losers"}`:"no trades");
+  $("#jTable").innerHTML = `<thead><tr><th>Closed</th><th>Symbol</th><th>Setup</th><th class="r">Qty</th><th class="r">Avg entry</th><th class="r">Exit</th><th class="r">Fees</th><th class="r">Realized P&amp;L</th><th>Notes</th></tr></thead><tbody>`+
+    (list.length? list.map(t=>`<tr><td class="num">${md(parse(t.d))}</td><td><button class="tk" data-id="${t.id}">${esc(t.t)}</button>${t.partial?'<span class="flag">partial basis</span>':""}</td><td class="muted">${esc(t.setup)}</td><td class="r num">${t.q.toLocaleString()}</td><td class="r num">${t.cost.toFixed(2)}</td><td class="r num">${t.px.toFixed(2)}</td><td class="r num">${t.fee.toFixed(2)}</td><td class="r num ${cls(t.pnl)}">${fmtS$(t.pnl,2)}</td><td class="muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${esc((savedNotes[noteKey(t)]??t.note)||"—")}</td></tr>`).join("") : `<tr><td colspan="9" class="muted">No closed trades in this period.</td></tr>`)+`</tbody>`;
+  document.querySelectorAll("#jRange button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===jp)));
+}
+$("#jRange").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; jp=b.dataset.p; drawJournal(); });
+const drawer=$("#drawer"), scrim=$("#scrim");
+function openTrade(id){ const t=S.trades.find(x=>x.id===id); if(!t) return;
+  const mult=t.mult||(/\d+\.\d+ [CP]$/.test(t.t)?100:1), k=noteKey(t), first=t.fills[0][0], lastF=t.fills[t.fills.length-1][0];
+  drawer.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="meta">${esc(t.setup)} · closed ${md(parse(t.d))}</div><h3 class="num">${esc(t.t)}</h3></div><button class="x" id="dClose" aria-label="Close" style="font-size:22px">×</button></div>
+    <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px"><div class="stat"><div class="k">Realized</div><div class="v ${cls(t.pnl)}">${fmtS$(t.pnl,2)}</div><div class="d">${t.cost?pct((t.px/t.cost-1)*100,1)+" on the position":""}</div></div><div class="stat"><div class="k">Held</div><div class="v">${Math.round((parse(lastF)-parse(first))/864e5)} days</div><div class="d">${t.q.toLocaleString()} ${mult>1?"contracts":"shares"}</div></div></div>
+    <h4 class="brief-h">Entries &amp; exits</h4>
+    ${t.fills.map(f=>`<div class="fill"><div class="hd"><b>${esc(f[1])}</b><span class="num muted">${md(parse(f[0]))}, ${parse(f[0]).getFullYear()}</span></div><div class="num" style="font-size:13px">${f[2].toLocaleString()} @ ${f[3].toFixed(2)} = ${fmt$(f[2]*f[3]*mult,2)}</div></div>`).join("")}
+    ${t.partial?`<p class="meta" style="color:var(--warn)">Part of this sale had no matching purchase in the file, so its gain only covers the matched shares.</p>`:""}
+    <h4 class="brief-h">Notes</h4>
+    <label for="noteBox" class="meta">What was the plan, and did you follow it?</label>
+    <textarea id="noteBox">${esc(savedNotes[k]??t.note)}</textarea>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button class="btn" id="noteSave">Save note</button><span class="meta" id="noteMsg"></span></div>`;
+  drawer.classList.add("open"); drawer.setAttribute("aria-hidden","false"); scrim.hidden=false; $("#dClose").focus();
+  $("#dClose").onclick=closeTrade;
+  $("#noteSave").onclick=()=>{ savedNotes[k]=$("#noteBox").value; store.set("cos-notes",savedNotes); $("#noteMsg").textContent="Saved"; drawJournal(); };
+}
+function closeTrade(){ drawer.classList.remove("open"); drawer.setAttribute("aria-hidden","true"); scrim.hidden=true; }
+scrim.onclick=closeTrade; document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeTrade(); });
+$("#jTable").addEventListener("click",e=>{ const b=e.target.closest(".tk"); if(b) openTrade(+b.dataset.id); });
+
+/* ---------- file loading ---------- */
+function msg(t,bad){ const m=$("#dataMsg"); m.textContent=t; m.style.color=bad?"var(--loss)":"var(--ink-2)"; }
+async function takeFiles(list){
+  let got=[];
+  for(const f of list){ const text=await f.text();
+    if(parseTransactions(text)){ files.tx=text; files.txName=f.name; got.push("transactions"); }
+    else if(parsePositions(text)){ files.pos=text; files.posName=f.name; got.push("positions"); }
+    else { msg(`${f.name} isn't a Schwab Positions or Transactions export. In Schwab, use Export on the Positions page or the History page.`,true); } }
+  if(got.length){ const ok=store.set("cos-files",files); rebuild(); msg(`Loaded ${got.join(" and ")}.${ok?" Kept in this browser only; nothing is uploaded.":" This browser won't keep it after a reload."}`); }
+}
+$("#fileIn").addEventListener("change",e=>{ takeFiles([...e.target.files]); e.target.value=""; });
+const drop=$("#drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop",e=>{ if(e.dataTransfer && e.dataTransfer.files.length) takeFiles([...e.dataTransfer.files]); });
+$("#startVal").value = startInput;
+$("#startVal").addEventListener("change",e=>{ startInput=e.target.value; store.set("cos-start",startInput); rebuild(); });
+$("#resetData").addEventListener("click",()=>{ files={}; store.del("cos-files"); rebuild(); msg("Back to sample data. His files were removed from this browser."); });
+
+drawTodos(); drawYear(); rebuild();
+})();
+</script>
