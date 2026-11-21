@@ -9,6 +9,7 @@ Single-file, view-only dashboard (`index.html`) Colby opens before the market.
 - **Travel conflicts:** trips that overlap earnings for a held stock, a Fed decision or a major economic release show at the top of the travel tile and in the attention panel, with the position's weight and an event link.
 - **Gmail review queue:** broker and price-alert emails have a Review button that adds the email to the to-do list. Newsletters appear in the morning brief.
 - **SEC filings:** EDGAR filings for holdings and watchlist in the morning brief (example list; links per holding in real mode).
+- **Weekly workouts:** editable Mon–Sun plan with today highlighted and checkmarks that clear each Monday; today's workout shows under the greeting.
 - **Still example content:** morning brief, Gmail, and the earnings/economic calendar.
 - `test-data/` holds mock exports in Schwab's CSV layout for testing.
 

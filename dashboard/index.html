@@ -224,6 +224,15 @@ th.r,td.r{text-align:right}
 .rv{font-size:11.5px;padding:3px 9px;flex:none;align-self:center}
 .rv[disabled]{opacity:.6;cursor:default}
 @media (max-width:760px){ .xgrid{grid-template-columns:minmax(0,1fr)} }
+.wk li{align-items:center;padding:6px 0}
+.wk input[type=checkbox]{width:16px;height:16px;accent-color:var(--gain);flex:none;margin:0}
+.wkday{width:34px;flex:none;font-family:var(--f-num);font-size:12px;font-weight:600;color:var(--muted)}
+.wkin{flex:1;min-width:0;border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 8px;font-size:13.5px}
+.wkin:hover{border-color:var(--line)} .wkin:focus{border-color:var(--accent);background:var(--sunk);outline:none}
+.wk li.now{background:var(--accent-soft);border-radius:8px;margin:0 -8px;padding-left:8px;padding-right:8px;border-bottom-color:transparent}
+.wk li.now .wkday{color:var(--accent)}
+.wk li.done .wkin{text-decoration:line-through;color:var(--muted)}
+.wk .tday{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);flex:none}
 .roadmap{padding-bottom:40px}
 .roadmap ol{margin:0;padding-left:20px;color:var(--ink-2);max-width:80ch}
 .roadmap li{margin-bottom:6px}
@@ -248,7 +257,7 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
   <div class="wrap">
     <div class="brand"><i></i>Chief of Staff</div>
     <nav class="nav" aria-label="Sections">
-      <a href="#portfolio">Portfolio</a><a href="#exposure">Exposure</a><a href="#pnl">P&amp;L</a><a href="#brief">Brief</a><a href="#journal">Journal</a><a href="#todo">To-do</a><a href="#mail">Mail</a><a href="#travel">Travel</a>
+      <a href="#portfolio">Portfolio</a><a href="#exposure">Exposure</a><a href="#pnl">P&amp;L</a><a href="#brief">Brief</a><a href="#journal">Journal</a><a href="#todo">To-do</a><a href="#workout">Workouts</a><a href="#mail">Mail</a><a href="#travel">Travel</a>
     </nav>
     <div class="sync"><span class="chip" id="srcChip">Sample data</span><span>Schwab sync <b class="num" id="syncTime">—</b></span></div>
   </div>
@@ -351,6 +360,12 @@ footer{font-size:12px;color:var(--muted);padding-bottom:30px}
         <div class="filters seg" id="todoFilter" role="group" aria-label="Show"><button data-f="open" aria-pressed="true">Open</button><button data-f="today">Due today</button><button data-f="all">All</button></div>
         <ul class="list todo" id="todoList"></ul>
         <p class="meta">Saved in this browser only for now.</p>
+      </section>
+
+      <section class="panel" id="workout">
+        <div class="ph"><div><h2>This week's workouts</h2><div class="sub">Click any day to change it</div></div><span class="sub" id="wkCount"></span></div>
+        <ul class="list wk" id="wkList"></ul>
+        <p class="meta">The plan repeats every week. Checkmarks clear each Monday.</p>
       </section>
 
       <section class="panel" id="mail">
@@ -742,7 +757,7 @@ function render(){
   drawPnl();
 
   drawExposure(); drawFilings(); drawYear(); drawJournal(); drawAttn();
-  $("#dateLine").textContent = "Saturday, November 21, 2026 · markets closed for the weekend";
+  $("#dateLine").innerHTML = `Saturday, November 21, 2026 · markets closed for the weekend<br>Today's workout: <b>${esc(plan[todayIdx]||"Rest")}</b>`;
   $("#session").innerHTML = "Next session <b>Mon Nov 23 · 8:30 AM CT</b><br>Futures reopen Sun 5:00 PM CT";
 }
 
@@ -895,6 +910,22 @@ $("#todoList").addEventListener("click",e=>{ const b=e.target.closest("[data-del
 $("#todoForm").addEventListener("submit",e=>{ e.preventDefault(); const t=$("#todoText").value.trim(); if(!t) return; todos.push({id:Date.now(),t,p:$("#todoPri").value,due:$("#todoDue").value,done:false}); store.set("cos-todos",todos); $("#todoText").value=""; $("#todoDue").value=""; drawTodos(); drawAttn(); });
 $("#todoFilter").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; tf=b.dataset.f; drawTodos(); });
 
+/* ---------- workouts ---------- */
+const WK_DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DEFAULT_PLAN=["Run 4 miles","AMP workout","Strength · upper body, 45 min","Easy run 3 miles","AMP workout","Long run 6 miles","Rest · walk and stretch"];
+let plan = store.get("cos-workout",DEFAULT_PLAN);
+const wkKey = "cos-wkdone-"+iso(mondayOf(TODAY)), todayIdx=(TODAY.getDay()+6)%7;
+let wkDone = store.get(wkKey,[]);
+const isRest = t => /^\s*(rest|off)\b/i.test(t) || !t.trim();
+function wkCount(){ const n=plan.filter(t=>!isRest(t)).length, d=wkDone.filter(i=>!isRest(plan[i]||"")).length; $("#wkCount").textContent=`${d} of ${n} done`; }
+function drawWorkouts(){
+  $("#wkList").innerHTML = WK_DAYS.map((d,i)=>`<li class="${i===todayIdx?"now":""} ${wkDone.includes(i)?"done":""}"><input type="checkbox" id="wkc${i}" data-i="${i}" ${wkDone.includes(i)?"checked":""} aria-label="${d} done"><label class="wkday" for="wkc${i}">${d}</label><input type="text" class="wkin" id="wkt${i}" data-i="${i}" value="${esc(plan[i]||"")}" placeholder="Rest" aria-label="${d} workout">${i===todayIdx?'<span class="tday">Today</span>':""}</li>`).join("");
+  wkCount(); }
+$("#wkList").addEventListener("change",e=>{ const i=+e.target.dataset.i;
+  if(e.target.type==="checkbox"){ wkDone=e.target.checked?[...new Set(wkDone.concat(i))]:wkDone.filter(x=>x!==i); store.set(wkKey,wkDone); e.target.closest("li").classList.toggle("done",e.target.checked); wkCount(); }
+  else { plan[i]=e.target.value.trim(); store.set("cos-workout",plan); wkCount(); if(i===todayIdx) render(); } });
+$("#wkList").addEventListener("keydown",e=>{ if(e.key==="Enter" && e.target.classList.contains("wkin")) e.target.blur(); });
+
 /* ---------- attention ---------- */
 function drawAttn(){
   if(!S) return;
@@ -1007,6 +1038,6 @@ $("#startVal").value = startInput;
 $("#startVal").addEventListener("change",e=>{ startInput=e.target.value; store.set("cos-start",startInput); rebuild(); });
 $("#resetData").addEventListener("click",()=>{ files={}; store.del("cos-files"); rebuild(); msg("Back to sample data. His files were removed from this browser."); });
 
-drawTodos(); drawMail(); rebuild();
+drawTodos(); drawMail(); drawWorkouts(); rebuild();
 })();
 </script>
